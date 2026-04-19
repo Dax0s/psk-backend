@@ -1,7 +1,9 @@
 package org.kotletai.backend.controller
 
 import jakarta.validation.Valid
+import org.kotletai.backend.model.CreateShoppingListItemRequest
 import org.kotletai.backend.model.CreateShoppingListRequest
+import org.kotletai.backend.model.ShoppingListItemResponse
 import org.kotletai.backend.model.ShoppingListResponse
 import org.kotletai.backend.model.toResponse
 import org.kotletai.backend.service.ShoppingListService
@@ -34,12 +36,19 @@ class ShoppingListController(
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     fun createShoppingList(
-        @Valid @RequestBody createShoppingListRequest: CreateShoppingListRequest,
-    ): ShoppingListResponse = shoppingListService.createShoppingList(createShoppingListRequest.name).toResponse()
+        @Valid @RequestBody request: CreateShoppingListRequest,
+    ): ShoppingListResponse = shoppingListService.createShoppingList(request.name).toResponse()
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deleteShoppingList(
         @PathVariable id: UUID,
     ) = shoppingListService.deleteShoppingList(id)
+
+    @PostMapping("/{id}")
+    @ResponseStatus(HttpStatus.CREATED)
+    fun createShoppingListItem(
+        @PathVariable id: UUID,
+        @Valid @RequestBody request: CreateShoppingListItemRequest,
+    ): ShoppingListItemResponse = shoppingListService.createShoppingListItem(id, request.name, request.quantity).toResponse()
 }

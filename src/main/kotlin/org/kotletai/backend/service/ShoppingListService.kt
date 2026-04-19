@@ -2,16 +2,20 @@ package org.kotletai.backend.service
 
 import org.kotletai.backend.config.CurrentUser
 import org.kotletai.backend.entity.ShoppingList
+import org.kotletai.backend.entity.ShoppingListItem
 import org.kotletai.backend.exception.NotFoundException
+import org.kotletai.backend.repository.ShoppingListItemRepository
 import org.kotletai.backend.repository.ShoppingListRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
 import java.util.UUID
 
 @Service
 class ShoppingListService(
     private val currentUser: CurrentUser,
     private val shoppingListRepository: ShoppingListRepository,
+    private val shoppingListItemRepository: ShoppingListItemRepository,
 ) {
     fun getShoppingLists(): List<ShoppingList> = shoppingListRepository.findByUser(currentUser.user)
 
@@ -26,5 +30,16 @@ class ShoppingListService(
             shoppingListRepository.findByIdOrNull(id) ?: throw NotFoundException("Shopping list with ID: $id not found")
 
         shoppingListRepository.delete(shoppingList)
+    }
+
+    fun createShoppingListItem(
+        id: UUID,
+        name: String,
+        quantity: BigDecimal,
+    ): ShoppingListItem {
+        val shoppingList =
+            shoppingListRepository.findByIdOrNull(id) ?: throw NotFoundException("Shopping list with ID: $id not found")
+
+        return shoppingListItemRepository.save(ShoppingListItem(shoppingList, name, quantity))
     }
 }
