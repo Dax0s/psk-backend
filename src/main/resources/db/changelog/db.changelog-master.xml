@@ -15,4 +15,42 @@
             </column>
         </createTable>
     </changeSet>
+
+    <changeSet id="2" author="domas">
+        <createTable tableName="shopping_list">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_shopping_list_user"
+                             references="user(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="3" author="domas">
+        <createTable tableName="shopping_list_item">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="shopping_list_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_shopping_list_item_shopping_list"
+                             references="shopping_list(id)"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quantity" type="DECIMAL(10,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="checked" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>

@@ -27,11 +27,13 @@ dependencies {
     implementation(libs.spring.boot.starter.liquibase)
     implementation(libs.spring.boot.starter.restclient)
     implementation(libs.spring.boot.starter.webmvc)
+    implementation(libs.spring.boot.starter.validation)
     implementation(libs.kotlin.reflect)
     implementation(libs.jackson.module.kotlin)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlin.logging)
     implementation(libs.spring.boot.starter.oauth2.resource.server)
+    implementation("jakarta.validation:jakarta.validation-api:3.1.1")
 
     runtimeOnly(libs.postgresql)
 
