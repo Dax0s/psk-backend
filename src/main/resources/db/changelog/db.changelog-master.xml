@@ -15,8 +15,7 @@
             </column>
         </createTable>
     </changeSet>
-  
+
     <include file="db/changelog/002-families.xml"/>
     <include file="db/changelog/003-family-member-email.xml"/>
-  
 </databaseChangeLog>
