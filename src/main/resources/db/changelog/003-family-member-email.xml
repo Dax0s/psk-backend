@@ -5,7 +5,10 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <include file="db/changelog/002-families.xml"/>
-    <include file="db/changelog/003-family-member-email.xml"/>
+    <changeSet id="003-add-email-to-family-members" author="psk">
+        <addColumn tableName="family_members">
+            <column name="email" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>

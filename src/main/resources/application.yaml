@@ -6,6 +6,7 @@ spring:
     username: postgres
     password: password
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: update
     show-sql: true
@@ -22,4 +23,4 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${JWT_ISSUER_URI:https://your-auth-provider.example.com}
+          issuer-uri: https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_X1KK5ugYR
