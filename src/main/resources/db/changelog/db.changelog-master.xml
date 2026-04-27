@@ -40,7 +40,9 @@
             <column name="shopping_list_id" type="UUID">
                 <constraints nullable="false"
                              foreignKeyName="fk_shopping_list_item_shopping_list"
-                             references="shopping_list(id)"/>
+                             references="shopping_list(id)"
+                             deleteCascade="true"
+                />
             </column>
             <column name="name" type="VARCHAR(255)">
                 <constraints nullable="false"/>

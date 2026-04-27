@@ -27,7 +27,8 @@ class ShoppingListService(
 
     fun deleteShoppingList(id: UUID) {
         val shoppingList =
-            shoppingListRepository.findByIdOrNull(id) ?: throw NotFoundException("Shopping list with ID: $id not found")
+            shoppingListRepository.findByIdAndUser(id, currentUser.user)
+                ?: throw NotFoundException("Shopping list with ID: $id not found")
 
         shoppingListRepository.delete(shoppingList)
     }
@@ -38,7 +39,8 @@ class ShoppingListService(
         quantity: BigDecimal,
     ): ShoppingListItem {
         val shoppingList =
-            shoppingListRepository.findByIdOrNull(id) ?: throw NotFoundException("Shopping list with ID: $id not found")
+            shoppingListRepository.findByIdAndUser(id, currentUser.user)
+                ?: throw NotFoundException("Shopping list with ID: $id not found")
 
         return shoppingListItemRepository.save(ShoppingListItem(shoppingList, name, quantity))
     }
