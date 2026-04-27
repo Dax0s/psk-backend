@@ -1,9 +1,21 @@
 package org.kotletai.backend.exception
 
-sealed class AppException(override val message: String) : RuntimeException(message)
+import org.springframework.http.HttpStatus
 
-class ConflictException(message: String) : AppException(message)
+sealed class AppException(
+    val status: HttpStatus,
+    val errorCode: String,
+    override val message: String,
+) : RuntimeException(message)
 
-class ForbiddenException(message: String) : AppException(message)
+class NotFoundException(errorCode: String, message: String) :
+    AppException(HttpStatus.NOT_FOUND, errorCode, message)
 
-class BadRequestException(message: String) : AppException(message)
+class ConflictException(errorCode: String, message: String) :
+    AppException(HttpStatus.CONFLICT, errorCode, message)
+
+class ForbiddenException(errorCode: String, message: String) :
+    AppException(HttpStatus.FORBIDDEN, errorCode, message)
+
+class BadRequestException(errorCode: String, message: String) :
+    AppException(HttpStatus.BAD_REQUEST, errorCode, message)
