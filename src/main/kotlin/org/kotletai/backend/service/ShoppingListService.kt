@@ -1,5 +1,6 @@
 package org.kotletai.backend.service
 
+import jakarta.transaction.Transactional
 import org.kotletai.backend.config.CurrentUser
 import org.kotletai.backend.entity.ShoppingList
 import org.kotletai.backend.entity.ShoppingListItem
@@ -25,6 +26,24 @@ class ShoppingListService(
 
     fun createShoppingList(name: String): ShoppingList = shoppingListRepository.save(ShoppingList(name, currentUser.user, mutableListOf()))
 
+    fun updateShoppingList(
+        id: UUID,
+        name: String,
+    ): ShoppingList {
+        val shoppingList =
+            shoppingListRepository.findByIdAndUser(id, currentUser.user)
+                ?: throw NotFoundException("Shopping list with ID: $id not found")
+
+        return shoppingListRepository.save(
+            ShoppingList(
+                name,
+                shoppingList.user,
+                shoppingList.items,
+                shoppingList.id,
+            ),
+        )
+    }
+
     fun deleteShoppingList(id: UUID) {
         val shoppingList =
             shoppingListRepository.findByIdAndUser(id, currentUser.user)
@@ -43,5 +62,43 @@ class ShoppingListService(
                 ?: throw NotFoundException("Shopping list with ID: $id not found")
 
         return shoppingListItemRepository.save(ShoppingListItem(shoppingList, name, quantity))
+    }
+
+    fun updateShoppingListItem(
+        id: UUID,
+        itemId: UUID,
+        name: String,
+        quantity: BigDecimal,
+        checked: Boolean,
+    ): ShoppingListItem {
+        val shoppingList =
+            shoppingListRepository.findByIdAndUser(id, currentUser.user)
+                ?: throw NotFoundException("Shopping list with ID: $id not found")
+
+        val shoppingListItem =
+            shoppingListItemRepository.findByIdAndShoppingList(itemId, shoppingList)
+                ?: throw NotFoundException("Shopping list item with ID: $itemId not found")
+
+        return shoppingListItemRepository.save(
+            ShoppingListItem(shoppingList, name, quantity, checked, shoppingListItem.id),
+        )
+    }
+
+    @Transactional
+    fun deleteShoppingListItem(
+        id: UUID,
+        itemId: UUID,
+    ) {
+        val shoppingList =
+            shoppingListRepository.findByIdAndUser(id, currentUser.user)
+                ?: throw NotFoundException("Shopping list with ID: $id not found")
+
+        val removed = shoppingList.items.removeIf { it.id == itemId }
+
+        if (!removed) {
+            throw NotFoundException("Shopping list item with ID: $id not found")
+        }
+
+        shoppingListRepository.save(shoppingList)
     }
 }

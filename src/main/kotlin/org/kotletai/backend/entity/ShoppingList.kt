@@ -19,7 +19,7 @@ class ShoppingList(
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     val user: User,
-    @OneToMany(mappedBy = "shoppingList", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "shoppingList", fetch = FetchType.LAZY, orphanRemoval = true)
     val items: MutableList<ShoppingListItem> = mutableListOf(),
     @Id
     @Column(nullable = false)
