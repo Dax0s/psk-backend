@@ -55,4 +55,6 @@
             </column>
         </createTable>
     </changeSet>
+
+    <include file="001-kan-12-pinned-products.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
