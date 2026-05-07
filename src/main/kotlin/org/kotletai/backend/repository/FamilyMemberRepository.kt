@@ -5,9 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import java.util.UUID
 
 interface FamilyMemberRepository : JpaRepository<FamilyMember, UUID> {
-    fun findAllByUserId(userId: String): List<FamilyMember>
-    fun findByFamilyIdAndUserId(familyId: UUID, userId: String): FamilyMember?
-    fun findAllByFamilyId(familyId: UUID): List<FamilyMember>
-    fun deleteByFamilyIdAndUserId(familyId: UUID, userId: String)
-    fun countByFamilyId(familyId: UUID): Long
+    fun findAllByUserCognitoId(cognitoId: String): List<FamilyMember>
+    fun findByFamilyIdAndUserCognitoId(familyId: UUID, cognitoId: String): FamilyMember?
+    fun deleteByFamilyIdAndUserCognitoId(familyId: UUID, cognitoId: String)
 }

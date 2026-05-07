@@ -1,15 +1,14 @@
 package org.kotletai.backend.service
 
-import org.kotletai.backend.dto.FamilyDetailResponse
-import org.kotletai.backend.dto.FamilyResponse
-import org.kotletai.backend.dto.FamilySummaryResponse
-import org.kotletai.backend.dto.MemberResponse
+import org.kotletai.backend.config.CurrentUser
 import org.kotletai.backend.exception.BadRequestException
 import org.kotletai.backend.exception.ConflictException
 import org.kotletai.backend.exception.ForbiddenException
 import org.kotletai.backend.exception.NotFoundException
 import org.kotletai.backend.model.Family
 import org.kotletai.backend.model.FamilyMember
+import org.kotletai.backend.model.FamilyResponse
+import org.kotletai.backend.model.toResponse
 import org.kotletai.backend.repository.FamilyMemberRepository
 import org.kotletai.backend.repository.FamilyRepository
 import org.springframework.stereotype.Service
@@ -17,160 +16,99 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-@Transactional
 class FamilyService(
     private val familyRepository: FamilyRepository,
     private val familyMemberRepository: FamilyMemberRepository,
+    private val currentUser: CurrentUser,
 ) {
     private val inviteCodeChars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 
-    fun createFamily(userId: String, name: String, email: String?): FamilyResponse {
-        val trimmedName = name.trim()
-        if (trimmedName.isBlank()) throw BadRequestException("INVALID_NAME", "Family name must not be blank.")
-        if (trimmedName.length > 100) throw BadRequestException("INVALID_NAME", "Family name must be at most 100 characters.")
+    @Transactional
+    fun createFamily(name: String, email: String?): FamilyResponse {
+        val user = currentUser.user
+        if (email != null) user.email = email
 
-        val inviteCode = generateUniqueInviteCode()
-
-        val family = familyRepository.save(
-            Family(
-                name = trimmedName,
-                inviteCode = inviteCode,
-                adminId = userId,
-            ),
+        val family = Family(
+            name = name,
+            inviteCode = generateUniqueInviteCode(),
+            admin = user,
         )
+        family.members.add(FamilyMember(family = family, user = user))
 
-        familyMemberRepository.save(
-            FamilyMember(
-                familyId = family.id!!,
-                userId = userId,
-                email = email,
-            ),
-        )
-
-        return FamilyResponse(
-            id = family.id!!,
-            name = family.name,
-            inviteCode = family.inviteCode,
-            isAdmin = true,
-            memberCount = 1,
-            createdAt = family.createdAt,
-        )
+        return familyRepository.save(family).toResponse(user.cognitoId)
     }
 
-    fun joinFamily(userId: String, inviteCode: String, email: String?): FamilyResponse {
+    @Transactional
+    fun joinFamily(inviteCode: String, email: String?): FamilyResponse {
+        val user = currentUser.user
+        if (email != null) user.email = email
         val family = familyRepository.findByInviteCode(inviteCode.trim().uppercase())
-            ?: throw NotFoundException("FAMILY_NOT_FOUND", "Family not found. Check the invite code and try again.")
+            ?: throw NotFoundException("Family not found. Check the invite code and try again.")
 
-        val familyId = family.id!!
-
-        if (familyMemberRepository.findByFamilyIdAndUserId(familyId, userId) != null) {
-            throw ConflictException("ALREADY_MEMBER", "You are already a member of this family.")
+        if (familyMemberRepository.findByFamilyIdAndUserCognitoId(family.id!!, user.cognitoId) != null) {
+            throw ConflictException("You are already a member of this family.")
         }
 
-        familyMemberRepository.save(
-            FamilyMember(
-                familyId = familyId,
-                userId = userId,
-                email = email,
-            ),
-        )
+        family.members.add(FamilyMember(family = family, user = user))
 
-        val memberCount = familyMemberRepository.countByFamilyId(familyId)
-
-        return FamilyResponse(
-            id = familyId,
-            name = family.name,
-            inviteCode = family.inviteCode,
-            isAdmin = family.adminId == userId,
-            memberCount = memberCount.toInt(),
-            createdAt = family.createdAt,
-        )
+        return family.toResponse(user.cognitoId)
     }
 
-    @Transactional(readOnly = true)
-    fun getMyFamilies(userId: String): List<FamilySummaryResponse> {
-        val memberships = familyMemberRepository.findAllByUserId(userId)
-        val familyIds = memberships.map { it.familyId }.toSet()
-        val families = familyRepository.findAllById(familyIds).associateBy { it.id!! }
-        val memberCounts = familyIds.associateWith { familyMemberRepository.countByFamilyId(it) }
-
-        return memberships.mapNotNull { membership ->
-            val family = families[membership.familyId] ?: return@mapNotNull null
-            FamilySummaryResponse(
-                id = family.id!!,
-                name = family.name,
-                inviteCode = family.inviteCode,
-                isAdmin = family.adminId == userId,
-                memberCount = (memberCounts[family.id!!] ?: 0L).toInt(),
-            )
-        }
+    @Transactional
+    fun getFamilies(): List<FamilyResponse> {
+        val user = currentUser.user
+        return familyMemberRepository.findAllByUserCognitoId(user.cognitoId)
+            .map { it.family.toResponse(user.cognitoId) }
     }
 
-    @Transactional(readOnly = true)
-    fun getFamilyDetails(userId: String, familyId: UUID): FamilyDetailResponse {
+    @Transactional
+    fun getFamily(familyId: UUID): FamilyResponse {
+        val user = currentUser.user
         val family = familyRepository.findById(familyId)
-            .orElseThrow { NotFoundException("FAMILY_NOT_FOUND", "Family not found.") }
+            .orElseThrow { NotFoundException("Family not found.") }
 
-        familyMemberRepository.findByFamilyIdAndUserId(familyId, userId)
-            ?: throw ForbiddenException("NOT_A_MEMBER", "You are not a member of this family.")
+        familyMemberRepository.findByFamilyIdAndUserCognitoId(familyId, user.cognitoId)
+            ?: throw ForbiddenException("You are not a member of this family.")
 
-        val members = familyMemberRepository.findAllByFamilyId(familyId).map { member ->
-            MemberResponse(
-                userId = member.userId,
-                email = member.email,
-                joinedAt = member.joinedAt,
-                isAdmin = member.userId == family.adminId,
-            )
-        }
-
-        return FamilyDetailResponse(
-            id = family.id!!,
-            name = family.name,
-            inviteCode = family.inviteCode,
-            isAdmin = family.adminId == userId,
-            createdAt = family.createdAt,
-            members = members,
-        )
+        return family.toResponse(user.cognitoId, includeMembers = true)
     }
 
-    fun removeMember(adminId: String, familyId: UUID, targetUserId: String) {
+    @Transactional
+    fun removeMember(familyId: UUID, targetUserId: String) {
+        val user = currentUser.user
         val family = familyRepository.findById(familyId)
-            .orElseThrow { NotFoundException("FAMILY_NOT_FOUND", "Family not found.") }
+            .orElseThrow { NotFoundException("Family not found.") }
 
-        if (family.adminId != adminId) {
-            throw ForbiddenException("NOT_ADMIN", "Only the family admin can remove members.")
-        }
-        if (targetUserId == family.adminId) {
-            throw BadRequestException("CANNOT_REMOVE_ADMIN", "Cannot remove the admin from the family.")
-        }
+        if (family.admin.cognitoId != user.cognitoId) throw ForbiddenException("Only the family admin can remove members.")
+        if (targetUserId == family.admin.cognitoId) throw BadRequestException("Cannot remove the admin from the family.")
 
-        familyMemberRepository.findByFamilyIdAndUserId(familyId, targetUserId)
-            ?: throw NotFoundException("MEMBER_NOT_FOUND", "The specified user is not a member of this family.")
+        familyMemberRepository.findByFamilyIdAndUserCognitoId(familyId, targetUserId)
+            ?: throw NotFoundException("The specified user is not a member of this family.")
 
-        familyMemberRepository.deleteByFamilyIdAndUserId(familyId, targetUserId)
+        familyMemberRepository.deleteByFamilyIdAndUserCognitoId(familyId, targetUserId)
     }
 
-    fun leaveFamily(userId: String, familyId: UUID) {
+    @Transactional
+    fun leaveFamily(familyId: UUID) {
+        val user = currentUser.user
         val family = familyRepository.findById(familyId)
-            .orElseThrow { NotFoundException("FAMILY_NOT_FOUND", "Family not found.") }
+            .orElseThrow { NotFoundException("Family not found.") }
 
-        familyMemberRepository.findByFamilyIdAndUserId(familyId, userId)
-            ?: throw NotFoundException("NOT_A_MEMBER", "You are not a member of this family.")
+        familyMemberRepository.findByFamilyIdAndUserCognitoId(familyId, user.cognitoId)
+            ?: throw NotFoundException("You are not a member of this family.")
 
-        if (family.adminId == userId) {
-            throw BadRequestException("ADMIN_CANNOT_LEAVE", "Admin cannot leave the family. Delete it instead.")
-        }
+        if (family.admin.cognitoId == user.cognitoId) throw BadRequestException("Admin cannot leave the family. Delete it instead.")
 
-        familyMemberRepository.deleteByFamilyIdAndUserId(familyId, userId)
+        familyMemberRepository.deleteByFamilyIdAndUserCognitoId(familyId, user.cognitoId)
     }
 
-    fun deleteFamily(userId: String, familyId: UUID) {
+    @Transactional
+    fun deleteFamily(familyId: UUID) {
+        val user = currentUser.user
         val family = familyRepository.findById(familyId)
-            .orElseThrow { NotFoundException("FAMILY_NOT_FOUND", "Family not found.") }
+            .orElseThrow { NotFoundException("Family not found.") }
 
-        if (family.adminId != userId) {
-            throw ForbiddenException("NOT_ADMIN", "Only the family admin can delete the family.")
-        }
+        if (family.admin.cognitoId != user.cognitoId) throw ForbiddenException("Only the family admin can delete the family.")
 
         familyRepository.delete(family)
     }
