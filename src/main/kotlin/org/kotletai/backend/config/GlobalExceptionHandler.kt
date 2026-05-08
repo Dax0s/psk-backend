@@ -1,9 +1,6 @@
 package org.kotletai.backend.config
 
-<<<<<<< HEAD
-=======
 import org.kotletai.backend.exception.AppException
->>>>>>> 8f9c6f9 (Resolved issues in the code)
 import org.kotletai.backend.exception.BadRequestException
 import org.kotletai.backend.exception.ConflictException
 import org.kotletai.backend.exception.ForbiddenException
@@ -11,6 +8,12 @@ import org.kotletai.backend.exception.NotFoundException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.FieldError
+import org.kotletai.backend.exception.NotFoundException
+import org.springframework.http.HttpStatus
+import org.springframework.http.ProblemDetail
+import org.springframework.http.ResponseEntity
+import org.springframework.validation.FieldError
+import org.springframework.validation.ObjectError
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus

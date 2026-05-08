@@ -90,7 +90,7 @@
             <not><tableExists tableName="family_members"/></not>
         </preConditions>
 
-    <changeSet id="6" author="psk">
+    <changeSet id="6" author="pranas">
         <createTable tableName="family_members">
             <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
                 <constraints primaryKey="true" nullable="false"/>
