@@ -3,11 +3,10 @@ package org.kotletai.backend.suggestions.domain
 import java.math.BigDecimal
 import java.time.Instant
 
-data class CompletedPurchaseRecord(
+data class ItemEntryRecord(
     val displayName: String,
     val productKey: String? = null,
     val quantity: BigDecimal? = null,
     val unit: String? = null,
-    val completedAt: Instant,
-    val signalWeight: Int = 1,
+    val enteredAt: Instant,
 )

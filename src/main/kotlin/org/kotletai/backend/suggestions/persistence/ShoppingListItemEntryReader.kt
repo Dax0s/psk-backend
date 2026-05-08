@@ -1,23 +1,20 @@
 package org.kotletai.backend.suggestions.persistence
 
 import jakarta.persistence.EntityManager
-import org.kotletai.backend.suggestions.domain.CompletedPurchaseHistoryReader
-import org.kotletai.backend.suggestions.domain.CompletedPurchaseRecord
+import org.kotletai.backend.suggestions.domain.ItemEntryReader
+import org.kotletai.backend.suggestions.domain.ItemEntryRecord
 import org.kotletai.backend.suggestions.domain.SuggestionScope
 import org.kotletai.backend.suggestions.domain.SuggestionScopeType
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Component
 import java.time.Instant
 
-private const val enteredItemWeight = 1
-private const val checkedItemWeight = 2
-
 @Component
 @Primary
-class ShoppingListItemSuggestionHistoryReader(
+class ShoppingListItemEntryReader(
     private val entityManager: EntityManager,
-) : CompletedPurchaseHistoryReader {
-    override fun findCompletedPurchases(scope: SuggestionScope): List<CompletedPurchaseRecord> {
+) : ItemEntryReader {
+    override fun findItemEntries(scope: SuggestionScope): List<ItemEntryRecord> {
         if (scope.type != SuggestionScopeType.PERSONAL) {
             return emptyList()
         }
@@ -27,8 +24,7 @@ class ShoppingListItemSuggestionHistoryReader(
                 """
                 select new org.kotletai.backend.suggestions.persistence.ShoppingListItemSuggestionRecord(
                     item.name,
-                    item.quantity,
-                    item.checked
+                    item.quantity
                 )
                 from ShoppingListItem item
                 join item.shoppingList shoppingList
@@ -40,11 +36,10 @@ class ShoppingListItemSuggestionHistoryReader(
             .setParameter("cognitoId", scope.referenceId)
             .resultList
             .map { record ->
-                CompletedPurchaseRecord(
+                ItemEntryRecord(
                     displayName = record.name,
                     quantity = record.quantity,
-                    completedAt = Instant.EPOCH,
-                    signalWeight = if (record.checked) checkedItemWeight else enteredItemWeight,
+                    enteredAt = Instant.EPOCH,
                 )
             }
     }

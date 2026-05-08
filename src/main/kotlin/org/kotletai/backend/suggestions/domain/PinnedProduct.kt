@@ -10,6 +10,7 @@ data class PinnedProduct(
     val displayName: String,
     val defaultQuantity: BigDecimal?,
     val unit: String?,
+    val sortOrder: Int,
     val createdAt: Instant,
     val updatedAt: Instant,
 )

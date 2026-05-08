@@ -42,6 +42,8 @@ class PinnedProductEntity(
     var defaultQuantity: BigDecimal? = null,
     @Column(name = "unit", length = 64)
     var unit: String? = null,
+    @Column(name = "sort_order", nullable = false)
+    var sortOrder: Int = 0,
     @Column(name = "created_at", nullable = false)
     var createdAt: Instant = Instant.now(),
     @Column(name = "updated_at", nullable = false)
@@ -55,6 +57,7 @@ fun PinnedProductEntity.toDomain(): PinnedProduct = PinnedProduct(
     displayName = displayName,
     defaultQuantity = defaultQuantity,
     unit = unit,
+    sortOrder = sortOrder,
     createdAt = createdAt,
     updatedAt = updatedAt,
 )

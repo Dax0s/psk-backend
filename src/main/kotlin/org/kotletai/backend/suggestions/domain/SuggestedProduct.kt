@@ -8,7 +8,6 @@ data class SuggestedProduct(
     val displayName: String,
     val suggestedQuantity: BigDecimal?,
     val unit: String?,
-    val purchaseCount: Int,
-    val lastCompletedAt: Instant,
-    val suggestionWeight: Int,
+    val entryCount: Int,
+    val lastEnteredAt: Instant,
 )

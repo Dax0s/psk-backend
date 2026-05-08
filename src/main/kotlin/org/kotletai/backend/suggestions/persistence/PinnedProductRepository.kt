@@ -12,7 +12,7 @@ interface PinnedProductRepository : JpaRepository<PinnedProductEntity, Long> {
 
     fun findAllByScopeTypeAndScopeId(scopeType: SuggestionScopeType, scopeId: String): List<PinnedProductEntity>
 
-    fun findAllByScopeTypeAndScopeIdOrderByDisplayNameAsc(
+    fun findAllByScopeTypeAndScopeIdOrderBySortOrderAscDisplayNameAsc(
         scopeType: SuggestionScopeType,
         scopeId: String,
     ): List<PinnedProductEntity>

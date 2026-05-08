@@ -88,16 +88,16 @@ data class SuggestedProductResponse(
     val displayName: String,
     val suggestedQuantity: BigDecimal?,
     val unit: String?,
-    val purchaseCount: Int,
-    val lastCompletedAt: Instant,
+    val entryCount: Int,
+    val lastEnteredAt: Instant,
 ) {
     constructor(product: SuggestedProduct) : this(
         productKey = product.productKey,
         displayName = product.displayName,
         suggestedQuantity = product.suggestedQuantity,
         unit = product.unit,
-        purchaseCount = product.purchaseCount,
-        lastCompletedAt = product.lastCompletedAt,
+        entryCount = product.entryCount,
+        lastEnteredAt = product.lastEnteredAt,
     )
 }
 
@@ -109,6 +109,7 @@ data class PinnedProductResponse(
     val displayName: String,
     val defaultQuantity: BigDecimal?,
     val unit: String?,
+    val sortOrder: Int,
     val createdAt: Instant,
     val updatedAt: Instant,
 ) {
@@ -120,6 +121,7 @@ data class PinnedProductResponse(
         displayName = product.displayName,
         defaultQuantity = product.defaultQuantity,
         unit = product.unit,
+        sortOrder = product.sortOrder,
         createdAt = product.createdAt,
         updatedAt = product.updatedAt,
     )
@@ -130,11 +132,13 @@ data class UpsertPinnedProductRequest(
     val productKey: String? = null,
     val defaultQuantity: BigDecimal? = null,
     val unit: String? = null,
+    val sortOrder: Int? = null,
 ) {
     fun toCommand(): UpsertPinnedProductCommand = UpsertPinnedProductCommand(
         displayName = displayName,
         productKey = productKey,
         defaultQuantity = defaultQuantity,
         unit = unit,
+        sortOrder = sortOrder,
     )
 }

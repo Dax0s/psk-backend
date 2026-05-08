@@ -17,7 +17,7 @@ class PinnedProductService(
 ) {
     @Transactional(readOnly = true)
     fun getPinnedProducts(scope: SuggestionScope): List<PinnedProduct> = pinnedProductRepository
-        .findAllByScopeTypeAndScopeIdOrderByDisplayNameAsc(scope.type, scope.referenceId)
+        .findAllByScopeTypeAndScopeIdOrderBySortOrderAscDisplayNameAsc(scope.type, scope.referenceId)
         .map(PinnedProductEntity::toDomain)
 
     fun createPinnedProduct(scope: SuggestionScope, command: UpsertPinnedProductCommand): PinnedProduct {
@@ -39,6 +39,7 @@ class PinnedProductService(
                 displayName = productDraft.displayName,
                 defaultQuantity = productDraft.defaultQuantity,
                 unit = productDraft.unit,
+                sortOrder = productDraft.sortOrder ?: nextSortOrder(scope),
                 createdAt = now,
                 updatedAt = now,
             ),
@@ -69,6 +70,7 @@ class PinnedProductService(
         entity.displayName = productDraft.displayName
         entity.defaultQuantity = productDraft.defaultQuantity
         entity.unit = productDraft.unit
+        productDraft.sortOrder?.let { entity.sortOrder = it }
         entity.updatedAt = Instant.now()
 
         return pinnedProductRepository.save(entity).toDomain()
@@ -80,6 +82,12 @@ class PinnedProductService(
 
         pinnedProductRepository.delete(entity)
     }
+
+    private fun nextSortOrder(scope: SuggestionScope): Int = pinnedProductRepository
+        .findAllByScopeTypeAndScopeId(scope.type, scope.referenceId)
+        .maxOfOrNull(PinnedProductEntity::sortOrder)
+        ?.plus(1)
+        ?: 0
 }
 
 data class UpsertPinnedProductCommand(
@@ -87,6 +95,7 @@ data class UpsertPinnedProductCommand(
     val productKey: String? = null,
     val defaultQuantity: BigDecimal? = null,
     val unit: String? = null,
+    val sortOrder: Int? = null,
 ) {
     fun toDraft(): PinnedProductDraft {
         val normalizedDisplayName = displayName.trim()
@@ -103,6 +112,7 @@ data class UpsertPinnedProductCommand(
                 ?: normalizeProductKey(normalizedDisplayName),
             defaultQuantity = defaultQuantity,
             unit = unit?.trim()?.takeIf { it.isNotBlank() },
+            sortOrder = sortOrder,
         )
     }
 }
@@ -112,4 +122,5 @@ data class PinnedProductDraft(
     val productKey: String,
     val defaultQuantity: BigDecimal?,
     val unit: String?,
+    val sortOrder: Int?,
 )

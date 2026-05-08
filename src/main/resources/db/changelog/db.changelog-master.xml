@@ -57,4 +57,5 @@
     </changeSet>
 
     <include file="001-kan-12-pinned-products.xml" relativeToChangelogFile="true"/>
+    <include file="002-kan-12-pinned-product-sort-order.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

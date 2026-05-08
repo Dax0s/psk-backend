@@ -8,32 +8,32 @@ private const val minimumSuggestionEntryCount = 2
 
 @Service
 class SuggestionQueryService(
-    private val completedPurchaseHistoryReader: CompletedPurchaseHistoryReader,
+    private val itemEntryReader: ItemEntryReader,
     private val pinnedProductReader: PinnedProductReader,
 ) {
     fun getSuggestions(scope: SuggestionScope): List<SuggestedProduct> {
         val pinnedProductKeys = pinnedProductReader.findPinnedProductKeys(scope)
 
-        return completedPurchaseHistoryReader.findCompletedPurchases(scope)
-            .mapNotNull(::toPurchaseCandidate)
-            .groupBy(PurchaseCandidate::productKey)
+        return itemEntryReader.findItemEntries(scope)
+            .mapNotNull(::toItemCandidate)
+            .groupBy(ItemCandidate::productKey)
             .values
             .map(::toSuggestedProduct)
-            .filter { it.purchaseCount >= minimumSuggestionEntryCount }
+            .filter { it.entryCount >= minimumSuggestionEntryCount }
             .filterNot { it.productKey in pinnedProductKeys }
             .sortedWith(
-                compareByDescending<SuggestedProduct> { it.suggestionWeight }
+                compareByDescending<SuggestedProduct> { it.entryCount }
                     .thenBy { it.displayName.lowercase(Locale.ROOT) },
             )
     }
 
-    private fun toPurchaseCandidate(record: CompletedPurchaseRecord): PurchaseCandidate? {
+    private fun toItemCandidate(record: ItemEntryRecord): ItemCandidate? {
         val displayName = record.displayName.trim()
         if (displayName.isBlank()) {
             return null
         }
 
-        return PurchaseCandidate(
+        return ItemCandidate(
             productKey = record.productKey
                 ?.takeIf { it.isNotBlank() }
                 ?.let(::normalizeProductKey)
@@ -41,32 +41,28 @@ class SuggestionQueryService(
             displayName = displayName,
             quantity = record.quantity,
             unit = record.unit?.trim()?.takeIf { it.isNotBlank() },
-            completedAt = record.completedAt,
-            signalWeight = record.signalWeight.coerceAtLeast(1),
+            enteredAt = record.enteredAt,
         )
     }
 
-    private fun toSuggestedProduct(candidates: List<PurchaseCandidate>): SuggestedProduct {
-        val mostRecentCandidate = candidates.maxBy(PurchaseCandidate::completedAt)
-        val suggestionWeight = candidates.sumOf(PurchaseCandidate::signalWeight)
+    private fun toSuggestedProduct(candidates: List<ItemCandidate>): SuggestedProduct {
+        val mostRecentCandidate = candidates.maxBy(ItemCandidate::enteredAt)
 
         return SuggestedProduct(
             productKey = mostRecentCandidate.productKey,
             displayName = mostRecentCandidate.displayName,
             suggestedQuantity = mostRecentCandidate.quantity,
             unit = mostRecentCandidate.unit,
-            purchaseCount = candidates.size,
-            lastCompletedAt = mostRecentCandidate.completedAt,
-            suggestionWeight = suggestionWeight,
+            entryCount = candidates.size,
+            lastEnteredAt = mostRecentCandidate.enteredAt,
         )
     }
 
-    private data class PurchaseCandidate(
+    private data class ItemCandidate(
         val productKey: String,
         val displayName: String,
         val quantity: java.math.BigDecimal?,
         val unit: String?,
-        val completedAt: Instant,
-        val signalWeight: Int,
+        val enteredAt: Instant,
     )
 }
