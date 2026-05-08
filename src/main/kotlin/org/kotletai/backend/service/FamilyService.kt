@@ -7,8 +7,6 @@ import org.kotletai.backend.exception.ForbiddenException
 import org.kotletai.backend.exception.NotFoundException
 import org.kotletai.backend.model.Family
 import org.kotletai.backend.model.FamilyMember
-import org.kotletai.backend.model.FamilyResponse
-import org.kotletai.backend.model.toResponse
 import org.kotletai.backend.repository.FamilyMemberRepository
 import org.kotletai.backend.repository.FamilyRepository
 import org.springframework.stereotype.Service
@@ -24,7 +22,7 @@ class FamilyService(
     private val inviteCodeChars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 
     @Transactional
-    fun createFamily(name: String, email: String?): FamilyResponse {
+    fun createFamily(name: String, email: String?): Family {
         val user = currentUser.user
         if (email != null) user.email = email
 
@@ -35,11 +33,11 @@ class FamilyService(
         )
         family.members.add(FamilyMember(family = family, user = user))
 
-        return familyRepository.save(family).toResponse(user.cognitoId)
+        return familyRepository.save(family)
     }
 
     @Transactional
-    fun joinFamily(inviteCode: String, email: String?): FamilyResponse {
+    fun joinFamily(inviteCode: String, email: String?): FamilyMember {
         val user = currentUser.user
         if (email != null) user.email = email
         val family = familyRepository.findByInviteCode(inviteCode.trim().uppercase())
@@ -49,20 +47,27 @@ class FamilyService(
             throw ConflictException("You are already a member of this family.")
         }
 
-        family.members.add(FamilyMember(family = family, user = user))
+        val member = FamilyMember(family = family, user = user)
+        family.members.add(member)
 
-        return family.toResponse(user.cognitoId)
+        // Initialize lazy associations before transaction closes
+        family.admin.cognitoId
+        family.members.size
+
+        return member
     }
 
     @Transactional
-    fun getFamilies(): List<FamilyResponse> {
+    fun getFamilies(): List<FamilyMember> {
         val user = currentUser.user
-        return familyMemberRepository.findAllByUserCognitoId(user.cognitoId)
-            .map { it.family.toResponse(user.cognitoId) }
+        return familyMemberRepository.findAllByUserCognitoId(user.cognitoId).onEach { member ->
+            member.family.admin.cognitoId
+            member.family.members.size
+        }
     }
 
     @Transactional
-    fun getFamily(familyId: UUID): FamilyResponse {
+    fun getFamily(familyId: UUID): Family {
         val user = currentUser.user
         val family = familyRepository.findById(familyId)
             .orElseThrow { NotFoundException("Family not found.") }
@@ -70,7 +75,11 @@ class FamilyService(
         familyMemberRepository.findByFamilyIdAndUserCognitoId(familyId, user.cognitoId)
             ?: throw ForbiddenException("You are not a member of this family.")
 
-        return family.toResponse(user.cognitoId, includeMembers = true)
+        // Initialize lazy associations before transaction closes
+        family.admin.cognitoId
+        family.members.forEach { it.user.cognitoId; it.user.email }
+
+        return family
     }
 
     @Transactional

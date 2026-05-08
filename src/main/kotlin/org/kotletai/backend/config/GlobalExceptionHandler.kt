@@ -34,24 +34,6 @@ class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(ErrorResponse(e.message))
     }
 
-    @ExceptionHandler(BadRequestException::class)
-    fun handleBadRequestException(e: BadRequestException): ResponseEntity<ProblemDetail> =
-        ResponseEntity
-            .status(HttpStatus.BAD_REQUEST)
-            .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.message))
-
-    @ExceptionHandler(ConflictException::class)
-    fun handleConflictException(e: ConflictException): ResponseEntity<ProblemDetail> =
-        ResponseEntity
-            .status(HttpStatus.CONFLICT)
-            .body(ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.message))
-
-    @ExceptionHandler(ForbiddenException::class)
-    fun handleForbiddenException(e: ForbiddenException): ResponseEntity<ProblemDetail> =
-        ResponseEntity
-            .status(HttpStatus.FORBIDDEN)
-            .body(ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, e.message))
-
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleValidationExceptions(ex: MethodArgumentNotValidException): MutableMap<String?, String?> {

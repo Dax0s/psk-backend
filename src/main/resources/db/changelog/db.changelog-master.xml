@@ -84,13 +84,11 @@
             <column name="invite_code"/>
         </createIndex>
     </changeSet>
-
+    
     <changeSet id="5" author="pranas">
         <preConditions onFail="MARK_RAN">
             <not><tableExists tableName="family_members"/></not>
         </preConditions>
-
-    <changeSet id="6" author="pranas">
         <createTable tableName="family_members">
             <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
                 <constraints primaryKey="true" nullable="false"/>
@@ -101,7 +99,6 @@
                              references="families(id)"
                              deleteCascade="true"/>
             </column>
-
             <column name="user_id" type="UUID">
                 <constraints nullable="false"
                              foreignKeyName="fk_family_members_user"
@@ -111,17 +108,17 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-
+        
         <addUniqueConstraint tableName="family_members"
                              columnNames="family_id, user_id"
                              constraintName="uq_family_members_family_user"/>
-
+        
         <createIndex indexName="idx_family_members_user_id" tableName="family_members">
             <column name="user_id"/>
         </createIndex>
     </changeSet>
 
-    <changeSet id="7" author="pranas">
+    <changeSet id="6" author="pranas">
         <preConditions onFail="MARK_RAN">
             <not><columnExists tableName="user" columnName="email"/></not>
         </preConditions>
@@ -130,29 +127,4 @@
         </addColumn>
     </changeSet>
 
-    <changeSet id="8" author="pranas">
-        <dropColumn tableName="families" columnName="admin_id"/>
-        <addColumn tableName="families">
-            <column name="admin_id" type="UUID">
-                <constraints nullable="false" foreignKeyName="fk_families_admin_user" references="user(id)"/>
-            </column>
-        </addColumn>
-    </changeSet>
-
-    <changeSet id="9" author="pranas">
-        <dropUniqueConstraint tableName="family_members" constraintName="uq_family_members_family_user"/>
-        <dropIndex tableName="family_members" indexName="idx_family_members_user_id"/>
-        <dropColumn tableName="family_members" columnName="user_id"/>
-        <addColumn tableName="family_members">
-            <column name="user_id" type="UUID">
-                <constraints nullable="false" foreignKeyName="fk_family_members_user" references="user(id)"/>
-            </column>
-        </addColumn>
-        <addUniqueConstraint tableName="family_members"
-                             columnNames="family_id, user_id"
-                             constraintName="uq_family_members_family_user"/>
-        <createIndex tableName="family_members" indexName="idx_family_members_user_id">
-            <column name="user_id"/>
-        </createIndex>
-    </changeSet>
 </databaseChangeLog>

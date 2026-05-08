@@ -1,9 +1,11 @@
 package org.kotletai.backend.controller
 
 import jakarta.validation.Valid
+import org.kotletai.backend.config.CurrentUser
 import org.kotletai.backend.model.CreateFamilyRequest
 import org.kotletai.backend.model.FamilyResponse
 import org.kotletai.backend.model.JoinFamilyRequest
+import org.kotletai.backend.model.toResponse
 import org.kotletai.backend.service.FamilyService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -20,25 +22,30 @@ import java.util.UUID
 @RequestMapping("/api/family")
 class FamilyController(
     private val familyService: FamilyService,
+    private val currentUser: CurrentUser,
 ) {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     fun createFamily(
         @Valid @RequestBody request: CreateFamilyRequest,
     ): FamilyResponse = familyService.createFamily(request.name, request.email)
+        .toResponse(currentUser.cognitoId)
 
     @PostMapping("/join")
     fun joinFamily(
         @Valid @RequestBody request: JoinFamilyRequest,
     ): FamilyResponse = familyService.joinFamily(request.inviteCode, request.email)
+        .family.toResponse(currentUser.cognitoId)
 
     @GetMapping
     fun getFamilies(): List<FamilyResponse> = familyService.getFamilies()
+        .map { it.family.toResponse(currentUser.cognitoId) }
 
     @GetMapping("/{familyId}")
-    fun getFamilyDetails(
+    fun getFamily(
         @PathVariable familyId: UUID,
     ): FamilyResponse = familyService.getFamily(familyId)
+        .toResponse(currentUser.cognitoId, includeMembers = true)
 
     @DeleteMapping("/{familyId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
