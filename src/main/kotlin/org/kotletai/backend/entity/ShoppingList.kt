@@ -9,6 +9,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
+import org.kotletai.backend.model.Family
 import java.util.UUID
 
 @Entity
@@ -21,6 +22,9 @@ class ShoppingList(
     val user: User,
     @OneToMany(mappedBy = "shoppingList", fetch = FetchType.LAZY, orphanRemoval = true)
     val items: MutableList<ShoppingListItem> = mutableListOf(),
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "family_id")
+    val family: Family? = null,
     @Id
     @Column(nullable = false)
     @GeneratedValue

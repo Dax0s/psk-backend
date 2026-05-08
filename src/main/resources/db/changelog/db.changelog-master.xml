@@ -127,4 +127,17 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="7" author="justinas">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="shopping_list" columnName="family_id"/></not>
+        </preConditions>
+        <addColumn tableName="shopping_list">
+            <column name="family_id" type="UUID">
+                <constraints nullable="true"
+                             foreignKeyName="fk_shopping_list_family"
+                             references="families(id)"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
