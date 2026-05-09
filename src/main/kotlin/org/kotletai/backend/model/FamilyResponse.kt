@@ -1,5 +1,6 @@
 package org.kotletai.backend.model
 
+import org.kotletai.backend.entity.Family
 import java.time.Instant
 import java.util.UUID
 

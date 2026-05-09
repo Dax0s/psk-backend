@@ -1,5 +1,6 @@
 package org.kotletai.backend.model
 
+import org.kotletai.backend.entity.FamilyMember
 import java.time.Instant
 
 data class MemberResponse(

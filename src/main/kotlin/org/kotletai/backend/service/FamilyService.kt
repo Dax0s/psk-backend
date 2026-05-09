@@ -5,8 +5,8 @@ import org.kotletai.backend.exception.BadRequestException
 import org.kotletai.backend.exception.ConflictException
 import org.kotletai.backend.exception.ForbiddenException
 import org.kotletai.backend.exception.NotFoundException
-import org.kotletai.backend.model.Family
-import org.kotletai.backend.model.FamilyMember
+import org.kotletai.backend.entity.Family
+import org.kotletai.backend.entity.FamilyMember
 import org.kotletai.backend.repository.FamilyMemberRepository
 import org.kotletai.backend.repository.FamilyRepository
 import org.springframework.stereotype.Service

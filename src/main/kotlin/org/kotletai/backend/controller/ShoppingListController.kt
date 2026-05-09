@@ -44,7 +44,7 @@ class ShoppingListController(
     @GetMapping("/family/{familyId}")
     @ResponseStatus(HttpStatus.OK)
     fun getShoppingListsByFamily(
-        @PathVariable familyId: java.util.UUID,
+        @PathVariable familyId: UUID,
     ): List<ShoppingListResponse> = shoppingListService.getShoppingListsByFamily(familyId).map { it.toResponse() }
 
     @PutMapping("/{id}")

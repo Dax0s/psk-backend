@@ -9,7 +9,6 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
-import org.kotletai.backend.model.Family
 import java.util.UUID
 
 @Entity

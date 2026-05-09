@@ -1,6 +1,6 @@
 package org.kotletai.backend.repository
 
-import org.kotletai.backend.model.FamilyMember
+import org.kotletai.backend.entity.FamilyMember
 import org.springframework.data.jpa.repository.JpaRepository
 import java.util.UUID
 
