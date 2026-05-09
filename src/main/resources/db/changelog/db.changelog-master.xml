@@ -57,9 +57,6 @@
     </changeSet>
 
     <changeSet id="4" author="pranas">
-        <preConditions onFail="MARK_RAN">
-            <not><tableExists tableName="families"/></not>
-        </preConditions>
         <createTable tableName="families">
             <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
                 <constraints primaryKey="true" nullable="false"/>
@@ -86,9 +83,6 @@
     </changeSet>
     
     <changeSet id="5" author="pranas">
-        <preConditions onFail="MARK_RAN">
-            <not><tableExists tableName="family_members"/></not>
-        </preConditions>
         <createTable tableName="family_members">
             <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
                 <constraints primaryKey="true" nullable="false"/>
@@ -119,18 +113,12 @@
     </changeSet>
 
     <changeSet id="6" author="pranas">
-        <preConditions onFail="MARK_RAN">
-            <not><columnExists tableName="user" columnName="email"/></not>
-        </preConditions>
         <addColumn tableName="user">
             <column name="email" type="VARCHAR(255)"/>
         </addColumn>
     </changeSet>
 
     <changeSet id="7" author="justinas">
-        <preConditions onFail="MARK_RAN">
-            <not><columnExists tableName="shopping_list" columnName="family_id"/></not>
-        </preConditions>
         <addColumn tableName="shopping_list">
             <column name="family_id" type="UUID">
                 <constraints nullable="true"
