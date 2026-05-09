@@ -33,8 +33,12 @@ class PinnedProductController(
         @Valid @RequestBody request: CreatePinnedProductRequest,
     ): PinnedProductResponse =
         suggestionService
-            .createPinnedProduct(request.name, request.defaultQuantity, request.sortOrder)
-            .toResponse()
+            .createPinnedProduct(
+                request.name,
+                request.defaultQuantity,
+                request.sortOrder,
+                request.category,
+            ).toResponse()
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
@@ -43,8 +47,13 @@ class PinnedProductController(
         @Valid @RequestBody request: UpdatePinnedProductRequest,
     ): PinnedProductResponse =
         suggestionService
-            .updatePinnedProduct(id, request.name, request.defaultQuantity, request.sortOrder)
-            .toResponse()
+            .updatePinnedProduct(
+                id,
+                request.name,
+                request.defaultQuantity,
+                request.sortOrder,
+                request.category,
+            ).toResponse()
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

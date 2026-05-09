@@ -2,12 +2,12 @@ package org.kotletai.backend.service
 
 import jakarta.transaction.Transactional
 import org.kotletai.backend.config.CurrentUser
+import org.kotletai.backend.entity.ProductCategory
 import org.kotletai.backend.entity.ShoppingList
 import org.kotletai.backend.entity.ShoppingListItem
 import org.kotletai.backend.exception.NotFoundException
 import org.kotletai.backend.repository.ShoppingListItemRepository
 import org.kotletai.backend.repository.ShoppingListRepository
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.util.UUID
@@ -56,12 +56,15 @@ class ShoppingListService(
         id: UUID,
         name: String,
         quantity: BigDecimal,
+        category: ProductCategory? = null,
     ): ShoppingListItem {
         val shoppingList =
             shoppingListRepository.findByIdAndUser(id, currentUser.user)
                 ?: throw NotFoundException("Shopping list with ID: $id not found")
 
-        return shoppingListItemRepository.save(ShoppingListItem(shoppingList, name, quantity))
+        return shoppingListItemRepository.save(
+            ShoppingListItem(shoppingList, name, quantity, category = category ?: ProductCategory.OTHER),
+        )
     }
 
     fun updateShoppingListItem(
@@ -70,6 +73,7 @@ class ShoppingListService(
         name: String,
         quantity: BigDecimal,
         checked: Boolean,
+        category: ProductCategory? = null,
     ): ShoppingListItem {
         val shoppingList =
             shoppingListRepository.findByIdAndUser(id, currentUser.user)
@@ -80,7 +84,14 @@ class ShoppingListService(
                 ?: throw NotFoundException("Shopping list item with ID: $itemId not found")
 
         return shoppingListItemRepository.save(
-            ShoppingListItem(shoppingList, name, quantity, checked, shoppingListItem.id),
+            ShoppingListItem(
+                shoppingList,
+                name,
+                quantity,
+                checked,
+                category ?: shoppingListItem.category,
+                shoppingListItem.id,
+            ),
         )
     }
 
