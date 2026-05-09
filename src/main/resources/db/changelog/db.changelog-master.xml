@@ -55,4 +55,24 @@
             </column>
         </createTable>
     </changeSet>
+
+    <changeSet id="4" author="gintaras">
+        <createTable tableName="pinned_product">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_pinned_product_user"
+                             references="user(id)"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="default_quantity" type="DECIMAL(10,2)"/>
+            <column name="sort_order" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>
