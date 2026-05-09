@@ -59,7 +59,10 @@ class ShoppingListController(
     fun createShoppingListItem(
         @PathVariable id: UUID,
         @Valid @RequestBody request: CreateShoppingListItemRequest,
-    ): ShoppingListItemResponse = shoppingListService.createShoppingListItem(id, request.name, request.quantity).toResponse()
+    ): ShoppingListItemResponse =
+        shoppingListService
+            .createShoppingListItem(id, request.name, request.quantity, request.category)
+            .toResponse()
 
     @PutMapping("/{id}/item/{itemId}")
     @ResponseStatus(HttpStatus.OK)
@@ -69,7 +72,7 @@ class ShoppingListController(
         @Valid @RequestBody request: UpdateShoppingListItemRequest,
     ): ShoppingListItemResponse =
         shoppingListService
-            .updateShoppingListItem(id, itemId, request.name, request.quantity, request.checked)
+            .updateShoppingListItem(id, itemId, request.name, request.quantity, request.checked, request.category)
             .toResponse()
 
     @DeleteMapping("/{id}/item/{itemId}")

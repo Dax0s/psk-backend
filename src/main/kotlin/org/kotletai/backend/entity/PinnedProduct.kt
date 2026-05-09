@@ -2,6 +2,8 @@ package org.kotletai.backend.entity
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.Id
@@ -23,6 +25,9 @@ class PinnedProduct(
     val defaultQuantity: BigDecimal? = null,
     @Column(name = "sort_order", nullable = false)
     val sortOrder: Int,
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    val category: ProductCategory = ProductCategory.OTHER,
     @Id
     @Column(nullable = false)
     @GeneratedValue

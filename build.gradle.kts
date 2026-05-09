@@ -34,6 +34,7 @@ dependencies {
     implementation(libs.kotlin.logging)
     implementation(libs.spring.boot.starter.oauth2.resource.server)
     implementation("jakarta.validation:jakarta.validation-api:3.1.1")
+    implementation(libs.jsoup)
 
     runtimeOnly(libs.postgresql)
 

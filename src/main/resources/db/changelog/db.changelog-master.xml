@@ -75,4 +75,54 @@
             </column>
         </createTable>
     </changeSet>
+
+    <changeSet id="5" author="ainius">
+        <createTable tableName="product_offer">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="source" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="category" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price" type="DECIMAL(10,2)"/>
+            <column name="old_price" type="VARCHAR(64)"/>
+            <column name="discount_pct" type="INT"/>
+            <column name="unit_price" type="VARCHAR(128)"/>
+            <column name="valid_to" type="VARCHAR(32)"/>
+            <column name="promo" type="VARCHAR(64)"/>
+            <column name="image_url" type="VARCHAR(1024)"/>
+            <column name="refreshed_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint
+                tableName="product_offer"
+                columnNames="source, category, name"
+                constraintName="uq_product_offer_source_category_name"/>
+        <createIndex tableName="product_offer" indexName="idx_product_offer_name">
+            <column name="name"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="6" author="ainius">
+        <addColumn tableName="shopping_list_item">
+            <column name="category" type="VARCHAR(64)" defaultValue="OTHER">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="7" author="ainius">
+        <addColumn tableName="pinned_product">
+            <column name="category" type="VARCHAR(64)" defaultValue="OTHER">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

@@ -2,6 +2,7 @@ package org.kotletai.backend.service
 
 import org.kotletai.backend.config.CurrentUser
 import org.kotletai.backend.entity.PinnedProduct
+import org.kotletai.backend.entity.ProductCategory
 import org.kotletai.backend.entity.User
 import org.kotletai.backend.exception.NotFoundException
 import org.kotletai.backend.model.SuggestedProductResponse
@@ -41,6 +42,7 @@ class SuggestionService(
                     name = first.name,
                     suggestedQuantity = first.quantity,
                     entryCount = candidates.size,
+                    category = first.category,
                 )
             }.sortedWith(
                 compareByDescending<SuggestedProductResponse> { it.entryCount }
@@ -54,11 +56,18 @@ class SuggestionService(
         name: String,
         defaultQuantity: BigDecimal?,
         sortOrder: Int?,
+        category: ProductCategory? = null,
     ): PinnedProduct {
         val user = currentUser.user
 
         return pinnedProductRepository.save(
-            PinnedProduct(user, name, defaultQuantity, sortOrder ?: nextSortOrder(user)),
+            PinnedProduct(
+                user,
+                name,
+                defaultQuantity,
+                sortOrder ?: nextSortOrder(user),
+                category ?: ProductCategory.OTHER,
+            ),
         )
     }
 
@@ -67,13 +76,21 @@ class SuggestionService(
         name: String,
         defaultQuantity: BigDecimal?,
         sortOrder: Int,
+        category: ProductCategory? = null,
     ): PinnedProduct {
         val pinnedProduct =
             pinnedProductRepository.findByIdAndUser(id, currentUser.user)
                 ?: throw NotFoundException("Pinned product with ID: $id not found")
 
         return pinnedProductRepository.save(
-            PinnedProduct(pinnedProduct.user, name, defaultQuantity, sortOrder, pinnedProduct.id),
+            PinnedProduct(
+                pinnedProduct.user,
+                name,
+                defaultQuantity,
+                sortOrder,
+                category ?: pinnedProduct.category,
+                pinnedProduct.id,
+            ),
         )
     }
 
