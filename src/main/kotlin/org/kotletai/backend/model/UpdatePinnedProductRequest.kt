@@ -3,6 +3,7 @@ package org.kotletai.backend.model
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
+import org.kotletai.backend.entity.ProductCategory
 import java.math.BigDecimal
 
 data class UpdatePinnedProductRequest(
@@ -12,4 +13,5 @@ data class UpdatePinnedProductRequest(
     val defaultQuantity: BigDecimal? = null,
     @field:NotNull(message = "Sort order is required")
     val sortOrder: Int,
+    val category: ProductCategory? = null,
 )

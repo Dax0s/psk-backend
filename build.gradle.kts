@@ -35,6 +35,7 @@ dependencies {
     implementation(libs.spring.boot.starter.oauth2.resource.server)
     implementation(libs.google.genai)
     implementation("jakarta.validation:jakarta.validation-api:3.1.1")
+    implementation(libs.jsoup)
 
     runtimeOnly(libs.postgresql)
 

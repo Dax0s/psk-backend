@@ -3,6 +3,7 @@ package org.kotletai.backend.model
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
+import org.kotletai.backend.entity.ProductCategory
 import java.math.BigDecimal
 
 data class UpdateShoppingListItemRequest(
@@ -12,4 +13,5 @@ data class UpdateShoppingListItemRequest(
     val quantity: BigDecimal,
     @field:NotNull(message = "Checked is required")
     val checked: Boolean,
+    val category: ProductCategory? = null,
 )
