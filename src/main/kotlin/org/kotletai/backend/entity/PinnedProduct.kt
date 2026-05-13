@@ -14,17 +14,17 @@ import java.math.BigDecimal
 import java.util.UUID
 
 @Entity
-@Table(name = "shopping_list_item")
-class ShoppingListItem(
+@Table(name = "pinned_product")
+class PinnedProduct(
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "shopping_list_id", nullable = false)
-    val shoppingList: ShoppingList,
+    @JoinColumn(name = "user_id", nullable = false)
+    val user: User,
     @Column(nullable = false)
     val name: String,
-    @Column(nullable = false)
-    val quantity: BigDecimal,
-    @Column(nullable = false)
-    val checked: Boolean = false,
+    @Column(name = "default_quantity")
+    val defaultQuantity: BigDecimal? = null,
+    @Column(name = "sort_order", nullable = false)
+    val sortOrder: Int,
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     val category: ProductCategory = ProductCategory.OTHER,

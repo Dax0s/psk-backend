@@ -1,23 +1,23 @@
 package org.kotletai.backend.model
 
+import org.kotletai.backend.entity.PinnedProduct
 import org.kotletai.backend.entity.ProductCategory
-import org.kotletai.backend.entity.ShoppingListItem
 import java.math.BigDecimal
 import java.util.UUID
 
-data class ShoppingListItemResponse(
+data class PinnedProductResponse(
     val id: UUID,
     val name: String,
-    val quantity: BigDecimal,
-    val checked: Boolean,
+    val defaultQuantity: BigDecimal?,
+    val sortOrder: Int,
     val category: ProductCategory,
 )
 
-fun ShoppingListItem.toResponse() =
-    ShoppingListItemResponse(
+fun PinnedProduct.toResponse() =
+    PinnedProductResponse(
         id = this.id!!,
         name = this.name,
-        quantity = this.quantity,
-        checked = this.checked,
+        defaultQuantity = this.defaultQuantity,
+        sortOrder = this.sortOrder,
         category = this.category,
     )

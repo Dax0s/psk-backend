@@ -6,12 +6,12 @@ import jakarta.validation.constraints.NotNull
 import org.kotletai.backend.entity.ProductCategory
 import java.math.BigDecimal
 
-data class UpdateShoppingListItemRequest(
+data class UpdatePinnedProductRequest(
     @field:NotBlank(message = "Name is required")
     val name: String,
-    @field:Min(value = 0, message = "Quantity should be more than or equal to 0")
-    val quantity: BigDecimal,
-    @field:NotNull(message = "Checked is required")
-    val checked: Boolean,
+    @field:Min(value = 0, message = "Default quantity should be more than or equal to 0")
+    val defaultQuantity: BigDecimal? = null,
+    @field:NotNull(message = "Sort order is required")
+    val sortOrder: Int,
     val category: ProductCategory? = null,
 )

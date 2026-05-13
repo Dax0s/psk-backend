@@ -56,7 +56,77 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="4" author="pranas">
+    <changeSet id="4" author="gintaras">
+        <createTable tableName="pinned_product">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_pinned_product_user"
+                             references="user(id)"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="default_quantity" type="DECIMAL(10,2)"/>
+            <column name="sort_order" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="5" author="ainius">
+        <createTable tableName="product_offer">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="source" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="category" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price" type="DECIMAL(10,2)"/>
+            <column name="old_price" type="VARCHAR(64)"/>
+            <column name="discount_pct" type="INT"/>
+            <column name="unit_price" type="VARCHAR(128)"/>
+            <column name="valid_to" type="VARCHAR(32)"/>
+            <column name="promo" type="VARCHAR(64)"/>
+            <column name="image_url" type="VARCHAR(1024)"/>
+            <column name="refreshed_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint
+                tableName="product_offer"
+                columnNames="source, category, name"
+                constraintName="uq_product_offer_source_category_name"/>
+        <createIndex tableName="product_offer" indexName="idx_product_offer_name">
+            <column name="name"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="6" author="ainius">
+        <addColumn tableName="shopping_list_item">
+            <column name="category" type="VARCHAR(64)" defaultValue="OTHER">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="7" author="ainius">
+        <addColumn tableName="pinned_product">
+            <column name="category" type="VARCHAR(64)" defaultValue="OTHER">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="8" author="pranas">
         <createTable tableName="family">
             <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
@@ -82,7 +152,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet id="5" author="pranas">
+    <changeSet id="9" author="pranas">
         <createTable tableName="family_member">
             <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
@@ -112,13 +182,13 @@
         </createIndex>
     </changeSet>
 
-    <changeSet id="6" author="pranas">
+    <changeSet id="10" author="pranas">
         <addColumn tableName="user">
             <column name="email" type="VARCHAR(255)"/>
         </addColumn>
     </changeSet>
 
-    <changeSet id="7" author="justinas">
+    <changeSet id="11" author="justinas">
         <addColumn tableName="shopping_list">
             <column name="family_id" type="UUID">
                 <constraints nullable="true"
