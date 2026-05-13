@@ -7,7 +7,6 @@ import org.kotletai.backend.entity.ShoppingListItem
 import org.kotletai.backend.exception.NotFoundException
 import org.kotletai.backend.repository.ShoppingListItemRepository
 import org.kotletai.backend.repository.ShoppingListRepository
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.util.UUID
@@ -17,6 +16,7 @@ class ShoppingListService(
     private val currentUser: CurrentUser,
     private val shoppingListRepository: ShoppingListRepository,
     private val shoppingListItemRepository: ShoppingListItemRepository,
+    private val shoppingListFromRecipeGenerator: ShoppingListFromRecipeGenerator,
 ) {
     fun getShoppingLists(): List<ShoppingList> = shoppingListRepository.findByUser(currentUser.user)
 
@@ -24,7 +24,8 @@ class ShoppingListService(
         shoppingListRepository.findByIdAndUser(id, currentUser.user)
             ?: throw NotFoundException("Shopping list with ID: $id not found")
 
-    fun createShoppingList(name: String): ShoppingList = shoppingListRepository.save(ShoppingList(name, currentUser.user, mutableListOf()))
+    fun createShoppingList(name: String): ShoppingList =
+        shoppingListRepository.save(ShoppingList(name, currentUser.user, mutableListOf()))
 
     fun updateShoppingList(
         id: UUID,
@@ -101,4 +102,21 @@ class ShoppingListService(
 
         shoppingListRepository.save(shoppingList)
     }
+
+    fun createShoppingListFromRecipe(
+        name: String,
+        link: String,
+    ): ShoppingList {
+        val shoppingList =
+            shoppingListRepository.save(ShoppingList(name, currentUser.user, mutableListOf()))
+
+        val shoppingListFromRecipe = shoppingListFromRecipeGenerator.generateShoppingListFromRecipe(link)
+
+        shoppingListFromRecipe.items.forEach {
+            shoppingList.addItem(it.name, it.quantity)
+        }
+
+        return shoppingListRepository.save(shoppingList)
+    }
+
 }
