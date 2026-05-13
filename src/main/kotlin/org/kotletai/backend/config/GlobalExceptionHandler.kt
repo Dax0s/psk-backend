@@ -1,5 +1,9 @@
 package org.kotletai.backend.config
 
+import org.kotletai.backend.exception.AppException
+import org.kotletai.backend.exception.BadRequestException
+import org.kotletai.backend.exception.ConflictException
+import org.kotletai.backend.exception.ForbiddenException
 import org.kotletai.backend.exception.NotFoundException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ProblemDetail
@@ -14,11 +18,19 @@ import java.util.function.Consumer
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
-    @ExceptionHandler(NotFoundException::class)
-    fun handleNotFoundException(e: NotFoundException): ResponseEntity<ProblemDetail> =
-        ResponseEntity
-            .status(HttpStatus.NOT_FOUND)
-            .body(ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.message))
+    @ExceptionHandler(AppException::class)
+    fun handleAppException(e: AppException): ResponseEntity<ProblemDetail> {
+        val status =
+            when (e) {
+                is NotFoundException -> HttpStatus.NOT_FOUND
+                is ConflictException -> HttpStatus.CONFLICT
+                is ForbiddenException -> HttpStatus.FORBIDDEN
+                is BadRequestException -> HttpStatus.BAD_REQUEST
+            }
+        return ResponseEntity
+            .status(status)
+            .body(ProblemDetail.forStatusAndDetail(status, e.message))
+    }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException::class)

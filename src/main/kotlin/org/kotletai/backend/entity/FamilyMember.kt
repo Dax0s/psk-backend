@@ -7,23 +7,21 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
-import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
+import java.time.Instant
 import java.util.UUID
 
 @Entity
-@Table(name = "shopping_list")
-class ShoppingList(
-    @Column(nullable = false)
-    val name: String,
+@Table(name = "family_member")
+class FamilyMember(
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "family_id", nullable = false)
+    val family: Family,
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     val user: User,
-    @OneToMany(mappedBy = "shoppingList", fetch = FetchType.LAZY, orphanRemoval = true)
-    val items: MutableList<ShoppingListItem> = mutableListOf(),
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "family_id")
-    val family: Family? = null,
+    @Column(name = "joined_at", nullable = false)
+    val joinedAt: Instant = Instant.now(),
     @Id
     @Column(nullable = false)
     @GeneratedValue

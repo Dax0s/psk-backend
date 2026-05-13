@@ -39,7 +39,13 @@ class ShoppingListController(
     @ResponseStatus(HttpStatus.CREATED)
     fun createShoppingList(
         @Valid @RequestBody request: ShoppingListRequest,
-    ): ShoppingListResponse = shoppingListService.createShoppingList(request.name).toResponse()
+    ): ShoppingListResponse = shoppingListService.createShoppingList(request.name, request.familyId).toResponse()
+
+    @GetMapping("/family/{familyId}")
+    @ResponseStatus(HttpStatus.OK)
+    fun getShoppingListsByFamily(
+        @PathVariable familyId: UUID,
+    ): List<ShoppingListResponse> = shoppingListService.getShoppingListsByFamily(familyId).map { it.toResponse() }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)

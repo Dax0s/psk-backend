@@ -15,4 +15,6 @@ interface ShoppingListRepository : JpaRepository<ShoppingList, UUID> {
         id: UUID,
         user: User,
     ): ShoppingList?
+
+    fun findByFamilyId(familyId: UUID): List<ShoppingList>
 }

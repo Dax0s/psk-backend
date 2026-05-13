@@ -1,14 +1,17 @@
 package org.kotletai.backend.service
 
-import jakarta.transaction.Transactional
 import org.kotletai.backend.config.CurrentUser
 import org.kotletai.backend.entity.ProductCategory
 import org.kotletai.backend.entity.ShoppingList
 import org.kotletai.backend.entity.ShoppingListItem
+import org.kotletai.backend.exception.ForbiddenException
 import org.kotletai.backend.exception.NotFoundException
+import org.kotletai.backend.repository.FamilyMemberRepository
+import org.kotletai.backend.repository.FamilyRepository
 import org.kotletai.backend.repository.ShoppingListItemRepository
 import org.kotletai.backend.repository.ShoppingListRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.util.UUID
 
@@ -17,15 +20,59 @@ class ShoppingListService(
     private val currentUser: CurrentUser,
     private val shoppingListRepository: ShoppingListRepository,
     private val shoppingListItemRepository: ShoppingListItemRepository,
+    private val familyMemberRepository: FamilyMemberRepository,
+    private val familyRepository: FamilyRepository,
 ) {
-    fun getShoppingLists(): List<ShoppingList> = shoppingListRepository.findByUser(currentUser.user)
+    @Transactional
+    fun getShoppingLists(): List<ShoppingList> =
+        shoppingListRepository.findByUser(currentUser.user).onEach { list ->
+            list.items.size
+            list.family?.name
+        }
 
-    fun getShoppingList(id: UUID): ShoppingList =
-        shoppingListRepository.findByIdAndUser(id, currentUser.user)
-            ?: throw NotFoundException("Shopping list with ID: $id not found")
+    @Transactional
+    fun getShoppingList(id: UUID): ShoppingList {
+        val user = currentUser.user
+        val list =
+            shoppingListRepository.findById(id).orElseThrow {
+                NotFoundException("Shopping list with ID: $id not found")
+            }
 
-    fun createShoppingList(name: String): ShoppingList = shoppingListRepository.save(ShoppingList(name, currentUser.user, mutableListOf()))
+        val isOwner = list.user.id == user.id
+        val isFamilyMember =
+            list.family != null &&
+                familyMemberRepository.findByFamilyIdAndUserCognitoId(list.family!!.id!!, user.cognitoId) != null
 
+        if (!isOwner && !isFamilyMember) {
+            throw ForbiddenException("You do not have access to this shopping list.")
+        }
+
+        list.items.size
+        list.family?.name
+        return list
+    }
+
+    fun createShoppingList(
+        name: String,
+        familyId: UUID?,
+    ): ShoppingList {
+        val user = currentUser.user
+        val family =
+            if (familyId != null) {
+                familyRepository
+                    .findById(familyId)
+                    .orElseThrow { NotFoundException("Family not found.") }
+                    .also {
+                        familyMemberRepository.findByFamilyIdAndUserCognitoId(familyId, user.cognitoId)
+                            ?: throw ForbiddenException("You are not a member of this family.")
+                    }
+            } else {
+                null
+            }
+        return shoppingListRepository.save(ShoppingList(name, user, mutableListOf(), family))
+    }
+
+    @Transactional
     fun updateShoppingList(
         id: UUID,
         name: String,
@@ -33,14 +80,8 @@ class ShoppingListService(
         val shoppingList =
             shoppingListRepository.findByIdAndUser(id, currentUser.user)
                 ?: throw NotFoundException("Shopping list with ID: $id not found")
-
         return shoppingListRepository.save(
-            ShoppingList(
-                name,
-                shoppingList.user,
-                shoppingList.items,
-                shoppingList.id,
-            ),
+            ShoppingList(name, shoppingList.user, shoppingList.items, shoppingList.family, shoppingList.id),
         )
     }
 
@@ -48,7 +89,6 @@ class ShoppingListService(
         val shoppingList =
             shoppingListRepository.findByIdAndUser(id, currentUser.user)
                 ?: throw NotFoundException("Shopping list with ID: $id not found")
-
         shoppingListRepository.delete(shoppingList)
     }
 
@@ -78,11 +118,9 @@ class ShoppingListService(
         val shoppingList =
             shoppingListRepository.findByIdAndUser(id, currentUser.user)
                 ?: throw NotFoundException("Shopping list with ID: $id not found")
-
         val shoppingListItem =
             shoppingListItemRepository.findByIdAndShoppingList(itemId, shoppingList)
                 ?: throw NotFoundException("Shopping list item with ID: $itemId not found")
-
         return shoppingListItemRepository.save(
             ShoppingListItem(
                 shoppingList,
@@ -103,13 +141,21 @@ class ShoppingListService(
         val shoppingList =
             shoppingListRepository.findByIdAndUser(id, currentUser.user)
                 ?: throw NotFoundException("Shopping list with ID: $id not found")
-
         val removed = shoppingList.items.removeIf { it.id == itemId }
-
         if (!removed) {
             throw NotFoundException("Shopping list item with ID: $id not found")
         }
-
         shoppingListRepository.save(shoppingList)
+    }
+
+    @Transactional
+    fun getShoppingListsByFamily(familyId: UUID): List<ShoppingList> {
+        val user = currentUser.user
+        familyMemberRepository.findByFamilyIdAndUserCognitoId(familyId, user.cognitoId)
+            ?: throw ForbiddenException("You are not a member of this family.")
+        return shoppingListRepository.findByFamilyId(familyId).onEach { list ->
+            list.items.size
+            list.family?.name
+        }
     }
 }
