@@ -14,6 +14,8 @@ import java.util.UUID
 class User(
     @Column(name = "cognito_id", nullable = false)
     val cognitoId: String,
+    @Column(name = "email")
+    var email: String? = null,
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     val shoppingLists: MutableList<ShoppingList> = mutableListOf(),
     @Id

@@ -17,7 +17,7 @@ import java.util.UUID
 @Table(name = "shopping_list")
 class ShoppingList(
     @Column(nullable = false)
-    val name: String,
+    var name: String,
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     val user: User,
@@ -28,6 +28,9 @@ class ShoppingList(
         orphanRemoval = true
     )
     val items: MutableList<ShoppingListItem> = mutableListOf(),
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "family_id")
+    val family: Family? = null,
     @Id
     @Column(nullable = false)
     @GeneratedValue
