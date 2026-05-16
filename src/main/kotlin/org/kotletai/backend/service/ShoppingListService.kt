@@ -155,6 +155,7 @@ class ShoppingListService(
         }
     }
 
+    @Transactional
     fun createShoppingListFromRecipe(
         name: String,
         link: String,
