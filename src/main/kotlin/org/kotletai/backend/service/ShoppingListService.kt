@@ -30,42 +30,28 @@ class ShoppingListService(
             list.family?.name
         }
 
-    @Transactional
-    fun getShoppingList(id: UUID): ShoppingList {
+    private fun requireFamilyAccess(id: UUID): ShoppingList {
         val user = currentUser.user
-        val list =
-            shoppingListRepository.findById(id).orElseThrow {
-                NotFoundException("Shopping list with ID: $id not found")
-            }
-
+        val list = shoppingListRepository.findById(id).orElseThrow {
+            NotFoundException("Shopping list with ID: $id not found")
+        }
         val isOwner = list.user.id == user.id
         val isFamilyMember =
             list.family != null &&
                 familyMemberRepository.findByFamilyIdAndUserCognitoId(list.family!!.id!!, user.cognitoId) != null
-
         if (!isOwner && !isFamilyMember) {
             throw ForbiddenException("You do not have access to this shopping list.")
         }
-
+        return list
+    }
+        
+    @Transactional
+    fun getShoppingList(id: UUID): ShoppingList {
+        val list = requireFamilyAccess(id)
         list.items.size
         list.family?.name
         return list
     }
-
-    private fun requireFamilyAccess(id: UUID): ShoppingList {
-    val user = currentUser.user
-    val list = shoppingListRepository.findById(id).orElseThrow {
-        NotFoundException("Shopping list with ID: $id not found")
-    }
-    val isOwner = list.user.id == user.id
-    val isFamilyMember =
-        list.family != null &&
-            familyMemberRepository.findByFamilyIdAndUserCognitoId(list.family!!.id!!, user.cognitoId) != null
-    if (!isOwner && !isFamilyMember) {
-        throw ForbiddenException("You do not have access to this shopping list.")
-    }
-    return list
-}
 
     fun createShoppingList(
         name: String,
