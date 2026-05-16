@@ -15,7 +15,7 @@ import java.util.UUID
 @Table(name = "shopping_list")
 class ShoppingList(
     @Column(nullable = false)
-    val name: String,
+    var name: String,
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     val user: User,
