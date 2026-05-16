@@ -26,17 +26,7 @@ class ShoppingListService(
     private val familyRepository: FamilyRepository,
 ) {
     @Transactional
-    fun getShoppingLists(): List<ShoppingList> {
-        val userShoppingLists =
-            shoppingListRepository.findByUser(currentUser.user).onEach { list ->
-                list.items.size
-                list.family?.name
-            }
-
-        val families = familyMemberRepository.findAllByUser(currentUser.user).map { it.family }
-        val familiesShoppingLists = families.flatMap { it.shoppingLists }
-        return (userShoppingLists + familiesShoppingLists).distinctBy { it.id }
-    }
+    fun getShoppingLists(): List<ShoppingList> = shoppingListRepository.findAllAccessibleBy(currentUser.user)
 
     private fun requireFamilyAccess(id: UUID): ShoppingList {
         val user = currentUser.user
