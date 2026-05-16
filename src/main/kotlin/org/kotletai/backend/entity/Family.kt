@@ -27,8 +27,6 @@ class Family(
     val createdAt: Instant = Instant.now(),
     @OneToMany(mappedBy = "family", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val members: MutableList<FamilyMember> = mutableListOf(),
-    @OneToMany(mappedBy = "family", fetch = FetchType.EAGER)
-    val shoppingLists: MutableList<ShoppingList> = mutableListOf(),
     @Id
     @Column(nullable = false)
     @GeneratedValue
