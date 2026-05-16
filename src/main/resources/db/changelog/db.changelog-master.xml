@@ -197,4 +197,10 @@
             </column>
         </addColumn>
     </changeSet>
+
+    <changeSet id="12" author="domas">
+        <addColumn tableName="shopping_list_item">
+            <column name="version" type="INTEGER"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

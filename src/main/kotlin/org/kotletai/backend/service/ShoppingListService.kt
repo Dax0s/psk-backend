@@ -4,12 +4,14 @@ import org.kotletai.backend.config.CurrentUser
 import org.kotletai.backend.entity.ProductCategory
 import org.kotletai.backend.entity.ShoppingList
 import org.kotletai.backend.entity.ShoppingListItem
+import org.kotletai.backend.exception.ConflictException
 import org.kotletai.backend.exception.ForbiddenException
 import org.kotletai.backend.exception.NotFoundException
 import org.kotletai.backend.repository.FamilyMemberRepository
 import org.kotletai.backend.repository.FamilyRepository
 import org.kotletai.backend.repository.ShoppingListItemRepository
 import org.kotletai.backend.repository.ShoppingListRepository
+import org.springframework.orm.ObjectOptimisticLockingFailureException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -24,17 +26,24 @@ class ShoppingListService(
     private val familyRepository: FamilyRepository,
 ) {
     @Transactional
-    fun getShoppingLists(): List<ShoppingList> =
-        shoppingListRepository.findByUser(currentUser.user).onEach { list ->
-            list.items.size
-            list.family?.name
-        }
+    fun getShoppingLists(): List<ShoppingList> {
+        val userShoppingLists =
+            shoppingListRepository.findByUser(currentUser.user).onEach { list ->
+                list.items.size
+                list.family?.name
+            }
+
+        val families = familyMemberRepository.findAllByUser(currentUser.user).map { it.family }
+        val familiesShoppingLists = families.flatMap { it.shoppingLists }
+        return (userShoppingLists + familiesShoppingLists).distinctBy { it.id }
+    }
 
     private fun requireFamilyAccess(id: UUID): ShoppingList {
         val user = currentUser.user
-        val list = shoppingListRepository.findById(id).orElseThrow {
-            NotFoundException("Shopping list with ID: $id not found")
-        }
+        val list =
+            shoppingListRepository.findById(id).orElseThrow {
+                NotFoundException("Shopping list with ID: $id not found")
+            }
         val isOwner = list.user.id == user.id
         val isFamilyMember =
             list.family != null &&
@@ -44,7 +53,7 @@ class ShoppingListService(
         }
         return list
     }
-        
+
     @Transactional
     fun getShoppingList(id: UUID): ShoppingList {
         val list = requireFamilyAccess(id)
@@ -76,7 +85,7 @@ class ShoppingListService(
     @Transactional
     fun updateShoppingList(
         id: UUID,
-        name: String
+        name: String,
     ): ShoppingList {
         val shoppingList = requireFamilyAccess(id)
         shoppingList.name = name
@@ -112,22 +121,28 @@ class ShoppingListService(
         name: String,
         quantity: BigDecimal,
         checked: Boolean,
+        version: Int,
         category: ProductCategory? = null,
     ): ShoppingListItem {
         val shoppingList = requireFamilyAccess(id)
         val shoppingListItem =
             shoppingListItemRepository.findByIdAndShoppingList(itemId, shoppingList)
                 ?: throw NotFoundException("Shopping list item with ID: $itemId not found")
-        return shoppingListItemRepository.save(
-            ShoppingListItem(
-                shoppingList,
-                name,
-                quantity,
-                checked,
-                category ?: shoppingListItem.category,
-                shoppingListItem.id,
-            ),
-        )
+        try {
+            return shoppingListItemRepository.save(
+                ShoppingListItem(
+                    shoppingList,
+                    name,
+                    quantity,
+                    checked,
+                    category ?: shoppingListItem.category,
+                    version,
+                    shoppingListItem.id,
+                ),
+            )
+        } catch (_: ObjectOptimisticLockingFailureException) {
+            throw ConflictException("Shopping list item with ID: $itemId already updated")
+        }
     }
 
     @Transactional
@@ -136,11 +151,10 @@ class ShoppingListService(
         itemId: UUID,
     ) {
         val shoppingList = requireFamilyAccess(id)
-        val removed = shoppingList.items.removeIf { it.id == itemId }
-        if (!removed) {
-            throw NotFoundException("Shopping list item with ID: $id not found")
-        }
-        shoppingListRepository.save(shoppingList)
+        val item =
+            shoppingListItemRepository.findByIdAndShoppingList(itemId, shoppingList)
+                ?: throw NotFoundException("Shopping list item with ID: $itemId not found")
+        shoppingListItemRepository.delete(item)
     }
 
     @Transactional

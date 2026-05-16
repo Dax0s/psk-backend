@@ -7,6 +7,7 @@ import java.util.UUID
 
 data class ShoppingListItemResponse(
     val id: UUID,
+    val version: Int,
     val name: String,
     val quantity: BigDecimal,
     val checked: Boolean,
@@ -16,6 +17,7 @@ data class ShoppingListItemResponse(
 fun ShoppingListItem.toResponse() =
     ShoppingListItemResponse(
         id = this.id!!,
+        version = this.version!!,
         name = this.name,
         quantity = this.quantity,
         checked = this.checked,

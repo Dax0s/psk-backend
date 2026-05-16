@@ -78,8 +78,15 @@ class ShoppingListController(
         @Valid @RequestBody request: UpdateShoppingListItemRequest,
     ): ShoppingListItemResponse =
         shoppingListService
-            .updateShoppingListItem(id, itemId, request.name, request.quantity, request.checked, request.category)
-            .toResponse()
+            .updateShoppingListItem(
+                id,
+                itemId,
+                request.name,
+                request.quantity,
+                request.checked,
+                request.version,
+                request.category,
+            ).toResponse()
 
     @DeleteMapping("/{id}/item/{itemId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
