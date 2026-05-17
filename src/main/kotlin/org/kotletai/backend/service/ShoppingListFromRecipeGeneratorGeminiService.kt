@@ -88,6 +88,19 @@ class ShoppingListFromRecipeGeneratorGeminiService : ShoppingListFromRecipeGener
 
     private val client = Client()
 
+    private val json = Json { ignoreUnknownKeys = true }
+
+    private fun extractJsonArray(raw: String): String {
+        val cleaned = raw
+            .replace(Regex("```json\\s*"), "")
+            .replace(Regex("```\\s*"), "")
+            .trim()
+        val start = cleaned.indexOf('[')
+        val end = cleaned.lastIndexOf(']')
+        if (start == -1 || end == -1 || end < start) return "[]"
+        return cleaned.substring(start, end + 1)
+    }
+
     override fun generateShoppingListFromRecipe(recipeUrl: String): ShoppingListFromRecipe {
         try {
             val response = client.models.generateContent(
@@ -101,11 +114,15 @@ class ShoppingListFromRecipeGeneratorGeminiService : ShoppingListFromRecipeGener
                 config
             )
 
-            println(response.text())
-            val items: List<GeminiShoppingListItem> = response.text()?.let { Json.decodeFromString(it) } ?: emptyList()
+            val rawText = response.text()
+            println("Gemini raw response: $rawText")
+            val jsonArray = rawText?.let { extractJsonArray(it) } ?: "[]"
+            val items: List<GeminiShoppingListItem> = json.decodeFromString(jsonArray)
             return ShoppingListFromRecipe(items)
         } catch (e: ServerException) {
-            e.message?.contains("high demand")?.let { throw NotFoundException("Model unavailable due to high demand") }
+            if (e.message?.contains("high demand") == true) {
+                throw NotFoundException("Model unavailable due to high demand")
+            }
             return ShoppingListFromRecipe(listOf())
         }
     }
