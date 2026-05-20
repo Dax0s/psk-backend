@@ -28,24 +28,33 @@ class FamilyController(
     @ResponseStatus(HttpStatus.CREATED)
     fun createFamily(
         @Valid @RequestBody request: CreateFamilyRequest,
-    ): FamilyResponse = familyService.createFamily(request.name, request.email)
-        .toResponse(currentUser.cognitoId)
+    ): FamilyResponse =
+        familyService
+            .createFamily(request.name, request.email)
+            .toResponse(currentUser.cognitoId)
 
     @PostMapping("/join")
     fun joinFamily(
         @Valid @RequestBody request: JoinFamilyRequest,
-    ): FamilyResponse = familyService.joinFamily(request.inviteCode, request.email)
-        .family.toResponse(currentUser.cognitoId)
+    ): FamilyResponse =
+        familyService
+            .joinFamily(request.inviteCode, request.email)
+            .family
+            .toResponse(currentUser.cognitoId)
 
     @GetMapping
-    fun getFamilies(): List<FamilyResponse> = familyService.getFamilies()
-        .map { it.family.toResponse(currentUser.cognitoId) }
+    fun getFamilies(): List<FamilyResponse> =
+        familyService
+            .getFamilies()
+            .map { it.family.toResponse(currentUser.cognitoId) }
 
     @GetMapping("/{familyId}")
     fun getFamily(
         @PathVariable familyId: UUID,
-    ): FamilyResponse = familyService.getFamily(familyId)
-        .toResponse(currentUser.cognitoId, includeMembers = true)
+    ): FamilyResponse =
+        familyService
+            .getFamily(familyId)
+            .toResponse(currentUser.cognitoId, includeMembers = true)
 
     @DeleteMapping("/{familyId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
