@@ -160,10 +160,14 @@ class ShoppingListService(
         name: String,
         link: String,
     ): ShoppingList {
+        val shoppingListFromRecipe = shoppingListFromRecipeGenerator.generateShoppingListFromRecipe(link)
+
+        if (shoppingListFromRecipe.items.isEmpty()) {
+            throw NotFoundException("Could not extract ingredients from recipe")
+        }
+
         val shoppingList =
             shoppingListRepository.save(ShoppingList(name, currentUser.user, mutableListOf()))
-
-        val shoppingListFromRecipe = shoppingListFromRecipeGenerator.generateShoppingListFromRecipe(link)
 
         shoppingListFromRecipe.items.forEach {
             shoppingList.addItem(it.name, it.quantity)
