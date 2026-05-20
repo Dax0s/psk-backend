@@ -13,5 +13,7 @@ data class UpdateShoppingListItemRequest(
     val quantity: BigDecimal,
     @field:NotNull(message = "Checked is required")
     val checked: Boolean,
+    @field:Min(value = 0, message = "Version should be more than or equal to 0")
+    val version: Int,
     val category: ProductCategory? = null,
 )

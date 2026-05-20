@@ -10,6 +10,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
+import jakarta.persistence.Version
 import java.math.BigDecimal
 import java.util.UUID
 
@@ -28,6 +29,8 @@ class ShoppingListItem(
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     val category: ProductCategory = ProductCategory.OTHER,
+    @Version
+    val version: Int? = null,
     @Id
     @Column(nullable = false)
     @GeneratedValue
