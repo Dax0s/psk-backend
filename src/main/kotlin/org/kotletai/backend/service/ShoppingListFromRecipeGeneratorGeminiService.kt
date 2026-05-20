@@ -115,7 +115,6 @@ class ShoppingListFromRecipeGeneratorGeminiService : ShoppingListFromRecipeGener
             )
 
             val rawText = response.text()
-            println("Gemini raw response: $rawText")
             val jsonArray = rawText?.let { extractJsonArray(it) } ?: "[]"
             val items: List<GeminiShoppingListItem> = json.decodeFromString(jsonArray)
             return ShoppingListFromRecipe(items)
