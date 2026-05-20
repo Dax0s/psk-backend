@@ -2,6 +2,7 @@ package org.kotletai.backend.controller
 
 import jakarta.validation.Valid
 import org.kotletai.backend.model.CreateShoppingListItemRequest
+import org.kotletai.backend.model.ShoppingListFromRecipeRequest
 import org.kotletai.backend.model.ShoppingListItemResponse
 import org.kotletai.backend.model.ShoppingListRequest
 import org.kotletai.backend.model.ShoppingListResponse
@@ -94,4 +95,15 @@ class ShoppingListController(
         @PathVariable id: UUID,
         @PathVariable itemId: UUID,
     ) = shoppingListService.deleteShoppingListItem(id, itemId)
+
+    @PostMapping("/from-recipe")
+    @ResponseStatus(HttpStatus.CREATED)
+    fun createShoppingListFromRecipe(
+        @Valid @RequestBody request: ShoppingListFromRecipeRequest,
+    ): ShoppingListResponse {
+        return shoppingListService
+            .createShoppingListFromRecipe(request.name, request.link)
+            .toResponse()
+    }
+
 }

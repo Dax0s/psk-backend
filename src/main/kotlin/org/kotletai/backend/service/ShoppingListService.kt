@@ -24,6 +24,7 @@ class ShoppingListService(
     private val shoppingListItemRepository: ShoppingListItemRepository,
     private val familyMemberRepository: FamilyMemberRepository,
     private val familyRepository: FamilyRepository,
+    private val shoppingListFromRecipeGenerator: ShoppingListFromRecipeGenerator,
 ) {
     @Transactional
     fun getShoppingLists(): List<ShoppingList> = shoppingListRepository.findAllAccessibleBy(currentUser.user)
@@ -156,5 +157,26 @@ class ShoppingListService(
             list.items.size
             list.family?.name
         }
+    }
+
+    @Transactional
+    fun createShoppingListFromRecipe(
+        name: String,
+        link: String,
+    ): ShoppingList {
+        val shoppingListFromRecipe = shoppingListFromRecipeGenerator.generateShoppingListFromRecipe(link)
+
+        if (shoppingListFromRecipe.items.isEmpty()) {
+            throw NotFoundException("Could not extract ingredients from recipe")
+        }
+
+        val shoppingList =
+            shoppingListRepository.save(ShoppingList(name, currentUser.user, mutableListOf()))
+
+        shoppingListFromRecipe.items.forEach {
+            shoppingList.addItem(it.name, it.quantity)
+        }
+
+        return shoppingListRepository.save(shoppingList)
     }
 }

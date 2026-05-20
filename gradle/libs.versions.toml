@@ -5,6 +5,7 @@ spring-dependency-management = "1.1.7"
 ktlint = "14.2.0"
 kotlinx-serialization = "1.10.0"
 kotlin-logging = "8.0.01"
+google-genai = "1.0.0"
 jsoup = "1.18.1"
 
 [libraries]
@@ -21,6 +22,8 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 
 jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin" }
 kotlin-logging = { module = "io.github.oshai:kotlin-logging", version.ref = "kotlin-logging" }
+
+google-genai = { module = "com.google.genai:google-genai", version.ref = "google-genai" }
 
 postgresql = { module = "org.postgresql:postgresql" }
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
