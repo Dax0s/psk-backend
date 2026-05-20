@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.invoke
+import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 import org.springframework.security.web.SecurityFilterChain
@@ -26,36 +27,10 @@ class SecurityConfig {
     private lateinit var issuerUri: String
 
     @Bean
-    fun jwtDecoder(): JwtDecoder {
-        val trustAllCerts =
-            arrayOf<TrustManager>(
-                object : X509TrustManager {
-                    override fun checkClientTrusted(
-                        chain: Array<out X509Certificate>?,
-                        authType: String?,
-                    ) {}
-
-                    override fun checkServerTrusted(
-                        chain: Array<out X509Certificate>?,
-                        authType: String?,
-                    ) {}
-
-                    override fun getAcceptedIssuers(): Array<X509Certificate> = emptyArray()
-                },
-            )
-        val sslContext = SSLContext.getInstance("TLS")
-        sslContext.init(null, trustAllCerts, SecureRandom())
-
-        HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.socketFactory)
-        HttpsURLConnection.setDefaultHostnameVerifier { _, _ -> true }
-
-        return NimbusJwtDecoder.withJwkSetUri("$issuerUri/.well-known/jwks.json").build()
-    }
-
-    @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http {
             cors { configurationSource = corsConfigurationSource() }
+            csrf { disable() }
 
             authorizeHttpRequests {
                 authorize(anyRequest, authenticated)
@@ -63,6 +38,10 @@ class SecurityConfig {
 
             oauth2ResourceServer {
                 jwt { }
+            }
+
+            sessionManagement {
+                sessionCreationPolicy = SessionCreationPolicy.STATELESS
             }
         }
 
@@ -72,9 +51,14 @@ class SecurityConfig {
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration()
-        configuration.allowedOrigins = listOf("http://localhost:3000")
+        configuration.allowedOrigins =
+            listOf(
+                "http://localhost:3000",
+                "https://psk.dklimavicius.com",
+            )
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
         configuration.allowedHeaders = listOf("*")
+        configuration.allowCredentials = true
 
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", configuration)

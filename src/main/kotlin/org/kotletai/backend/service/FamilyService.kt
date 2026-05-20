@@ -98,7 +98,7 @@ class FamilyService(
     @Transactional
     fun removeMember(
         familyId: UUID,
-        targetUserId: String,
+        targetUserId: UUID,
     ) {
         val user = currentUser.user
         val family =

@@ -10,11 +10,11 @@ interface FamilyMemberRepository : JpaRepository<FamilyMember, UUID> {
 
     fun findByFamilyIdAndUserCognitoId(
         familyId: UUID,
-        cognitoId: String,
+        cognitoId: UUID,
     ): FamilyMember?
 
     fun deleteByFamilyIdAndUserCognitoId(
         familyId: UUID,
-        cognitoId: String,
+        cognitoId: UUID,
     )
 }

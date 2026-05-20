@@ -66,7 +66,7 @@ class FamilyController(
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun removeMember(
         @PathVariable familyId: UUID,
-        @PathVariable userId: String,
+        @PathVariable userId: UUID,
     ) = familyService.removeMember(familyId, userId)
 
     @PostMapping("/{familyId}/leave")

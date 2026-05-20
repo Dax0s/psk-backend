@@ -18,8 +18,7 @@ USER spring
 
 COPY --from=build /app/build/libs/*.jar app.jar
 
-ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -XX:+UseSerialGC"
-
 EXPOSE 8080
+ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -XX:+UseSerialGC"
 
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

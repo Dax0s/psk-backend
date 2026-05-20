@@ -15,7 +15,7 @@ data class FamilyResponse(
 )
 
 fun Family.toResponse(
-    userId: String,
+    userId: UUID,
     includeMembers: Boolean = false,
 ) = FamilyResponse(
     id = id!!,

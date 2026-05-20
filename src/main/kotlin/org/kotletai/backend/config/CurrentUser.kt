@@ -6,19 +6,20 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Component
 import org.springframework.web.context.annotation.RequestScope
+import java.util.UUID
 
 @Component
 @RequestScope
 class CurrentUser(
     val userRepository: UserRepository,
 ) {
-    val cognitoId: String by lazy {
+    val cognitoId: UUID by lazy {
         val jwt =
             SecurityContextHolder
                 .getContext()
                 .authentication
                 ?.principal as Jwt
-        jwt.subject
+        UUID.fromString(jwt.subject)
     }
 
     val user: User by lazy {
