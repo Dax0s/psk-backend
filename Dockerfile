@@ -1,9 +1,12 @@
 FROM eclipse-temurin:25-jdk-alpine AS build
 WORKDIR /app
 
+ENV JAVA_HOME=/opt/java/openjdk
+ENV PATH="$JAVA_HOME/bin:$PATH"
+
 COPY gradlew .
 COPY gradle gradle
-COPY build.gradle.kts settings.gradle.kts ./
+COPY build.gradle.kts settings.gradle.kts gradle.properties ./
 
 RUN chmod +x gradlew && ./gradlew dependencies --no-daemon || true
 
@@ -18,8 +21,7 @@ USER spring
 
 COPY --from=build /app/build/libs/*.jar app.jar
 
-ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -XX:+UseSerialGC"
-
 EXPOSE 8080
+ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -XX:+UseSerialGC"
 
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
