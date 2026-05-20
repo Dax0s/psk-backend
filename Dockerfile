@@ -1,12 +1,9 @@
 FROM eclipse-temurin:25-jdk-alpine AS build
 WORKDIR /app
 
-ENV JAVA_HOME=/opt/java/openjdk
-ENV PATH="$JAVA_HOME/bin:$PATH"
-
 COPY gradlew .
 COPY gradle gradle
-COPY build.gradle.kts settings.gradle.kts gradle.properties ./
+COPY build.gradle.kts settings.gradle.kts ./
 
 RUN chmod +x gradlew && ./gradlew dependencies --no-daemon || true
 

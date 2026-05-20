@@ -2,15 +2,16 @@ package org.kotletai.backend.model
 
 import org.kotletai.backend.entity.FamilyMember
 import java.time.Instant
+import java.util.UUID
 
 data class MemberResponse(
-    val userId: String,
+    val userId: UUID,
     val email: String?,
     val joinedAt: Instant,
     val isAdmin: Boolean,
 )
 
-fun FamilyMember.toResponse(adminId: String) =
+fun FamilyMember.toResponse(adminId: UUID) =
     MemberResponse(
         userId = this.user.cognitoId,
         email = this.user.email,
