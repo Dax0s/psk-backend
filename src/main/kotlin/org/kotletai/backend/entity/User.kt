@@ -13,7 +13,7 @@ import java.util.UUID
 @Table(name = "\"user\"")
 class User(
     @Column(name = "cognito_id", nullable = false)
-    val cognitoId: String,
+    val cognitoId: UUID,
     @Column(name = "email")
     var email: String? = null,
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
