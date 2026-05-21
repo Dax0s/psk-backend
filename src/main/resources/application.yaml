@@ -24,3 +24,10 @@ spring:
           issuer-uri: https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_X1KK5ugYR
 
 shopping-list-from-recipe-generator: ${SHOPPING_LIST_FROM_GENERATOR:mock}
+
+audit:
+  enabled: true
+  include-args: false
+
+logs:
+  buffer-size: 500

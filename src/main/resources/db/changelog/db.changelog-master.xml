@@ -203,4 +203,12 @@
             <column name="version" type="INTEGER"/>
         </addColumn>
     </changeSet>
+
+    <changeSet id="13" author="ainius">
+        <addColumn tableName="user">
+            <column name="role" type="VARCHAR(32)" defaultValue="REGULAR">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
