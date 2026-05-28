@@ -1,6 +1,8 @@
 package org.kotletai.backend.config
 
 import org.kotletai.backend.entity.User
+import org.kotletai.backend.entity.UserRole
+import org.kotletai.backend.exception.ForbiddenException
 import org.kotletai.backend.repository.UserRepository
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.jwt.Jwt
@@ -24,5 +26,14 @@ class CurrentUser(
 
     val user: User by lazy {
         userRepository.findByCognitoId(cognitoId) ?: userRepository.save(User(cognitoId))
+    }
+
+    val isAdmin: Boolean
+        get() = user.role == UserRole.ADMIN
+
+    fun requireAdmin() {
+        if (!isAdmin) {
+            throw ForbiddenException("Admin role required")
+        }
     }
 }

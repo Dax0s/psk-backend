@@ -2,6 +2,8 @@ package org.kotletai.backend.entity
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.Id
@@ -16,6 +18,9 @@ class User(
     val cognitoId: UUID,
     @Column(name = "email")
     var email: String? = null,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false, length = 32)
+    var role: UserRole = UserRole.REGULAR,
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     val shoppingLists: MutableList<ShoppingList> = mutableListOf(),
     @Id
